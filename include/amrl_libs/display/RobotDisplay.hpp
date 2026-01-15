@@ -9,11 +9,11 @@
 #pragma once
 
 #include <ros/ros.h>
-#include <visualization_msgs/Marker.h>
+#include <geometry_msgs/Pose.h>
+#include <std_msgs/String.h>
 #include <tf2_ros/transform_broadcaster.h>
 
-namespace amrl
-{
+namespace amrl {
 
 class RobotDisplayManager
 {
@@ -36,6 +36,7 @@ public:
   void initialize_single(
     const std::string &robot_name,
     const std::string &topic,
+    const std::string &display_topic,
     const geometry_msgs::Pose &robot_pose,
     const uint8_t robot_display_type,
     const std::string &color,
@@ -46,9 +47,11 @@ public:
 
   void initialize_from_json_file(const std::string &filename);
 
-  void update(const std::string &rbt_name, 
-    const geometry_msgs::Point &rbt_pt,
-    const geometry_msgs::Quaternion &rbt_orientation);
+  void update_pose(const std::string &rbt_name, 
+    const geometry_msgs::Pose &rbt_pose);
+
+  void update_color(const std::string &rbt_name, 
+    const std::string &color);
 
   void remove_robot(const std::string &rbt_name);
 
@@ -74,8 +77,11 @@ private:
   /// Names of all the displayed tasks currently being manged by object
   std::set<std::string> _robot_names;
 
-  /// Map from name of a robot to the ROS objects need to send updates
+  /// Map from name of a robot to the ROS objects need to send pose updates
   std::map<std::string, std::pair<ros::Publisher, geometry_msgs::Pose>> _rbt_pubs;
+
+  /// Map from name of a robot to objects for changing robot color
+  std::map<std::string, std::pair<ros::Publisher, std_msgs::String>> _disp_pubs;
 
   // ----------------------------------- //
   // --       Class Constants         -- //

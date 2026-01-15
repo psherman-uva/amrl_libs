@@ -26,8 +26,9 @@ public:
     /// Destructor
   ~FigureDisplayManager(void) = default;
 
-  void add_from_ros_params(const std::string &ns);
-
+  void add_from_ros_params(
+    const std::string &ns,
+    bool use_map_limits);
 
   // ----------------------------------- //
   // --    Public Class Methods       -- //

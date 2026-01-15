@@ -393,5 +393,22 @@ std::vector<std::string> robot_names_from_file(const std::string &full_rbt_file)
   return rbt_names;
 }
 
+bool param_namespace_exists(const std::string &ns)
+{
+  std::string prefix = ros::names::clean(ns);
+  if (prefix.back() != '/') { prefix += '/'; }
+
+  std::vector<std::string> param_names;
+  ros::param::getParamNames(param_names);
+
+  for (const auto& name : param_names) {
+    if (name.compare(0, prefix.size(), prefix) == 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 } // namespace util
 } // namespace amrl

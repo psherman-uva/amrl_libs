@@ -125,5 +125,7 @@ bool logging_full_setup(
 std::vector<std::string> robot_names_from_file(const std::string &full_rbt_file);
 
 
+bool param_namespace_exists(const std::string &ns);
+
 } // namespace util
 } // namespace amrl

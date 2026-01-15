@@ -6,7 +6,7 @@
 #include <amrl_display/AddRobot.h>
 
 #include <nlohmann/json.hpp>
-#include <geometry_msgs/Pose.h>
+
 
 #include <fstream>
 
@@ -40,13 +40,14 @@ void RobotDisplayManager::initialize_from_json_file(const std::string &filename)
     for(json::iterator it = robots.begin(); it != robots.end(); ++it) {
       geometry_msgs::Pose pose;
       std::vector<double> dimensions;
-      std::string topic    = ""; 
-      uint8_t display_type = amrl_display::AddRobot::Request::TYPE_POINT;
-      double scaling       = kDefaultScaling;
-      double theta         = kDefaultTheta;
-      double alpha         = kDefaultAlpha;
-      double zorder        = kDefaultZOrder;
-      std::string color    = kDefaultRbtColor;
+      std::string topic      = ""; 
+      std::string disp_topic = "";
+      uint8_t disp_type      = amrl_display::AddRobot::Request::TYPE_POINT;
+      double scaling         = kDefaultScaling;
+      double theta           = kDefaultTheta;
+      double alpha           = kDefaultAlpha;
+      double zorder          = kDefaultZOrder;
+      std::string color      = kDefaultRbtColor;
 
       if(it->contains("topic")) { topic = it.value()["topic"]; }
       if(it->contains("theta")) { theta = it.value()["theta"]; }
@@ -57,7 +58,8 @@ void RobotDisplayManager::initialize_from_json_file(const std::string &filename)
 
       if (it->contains("display")) {
         json config = it->at("display");  
-          if(config.contains("type"))    { display_type = config["type"]; }
+          if(config.contains("type"))    { disp_type  = config["type"]; }
+          if(config.contains("topic"))   { disp_topic = config["topic"]; }
           if(config.contains("scaling")) { scaling = config["scaling"]; }
           if(config.contains("color"))   { color   = config["color"]; }
           if(config.contains("alpha"))   { alpha   = config["alpha"];   }
@@ -70,7 +72,7 @@ void RobotDisplayManager::initialize_from_json_file(const std::string &filename)
       }
 
       initialize_single(it.value()["name"],
-        topic, pose, display_type,
+        topic, disp_topic, pose, disp_type,
         color, alpha, zorder, scaling, dimensions);
     }
 
@@ -82,6 +84,7 @@ void RobotDisplayManager::initialize_from_json_file(const std::string &filename)
 void RobotDisplayManager::initialize_single(
   const std::string &robot_name,
   const std::string &topic,
+  const std::string &display_topic,
   const geometry_msgs::Pose &robot_pose,
   const uint8_t robot_display_type,
   const std::string &color,
@@ -97,13 +100,14 @@ void RobotDisplayManager::initialize_single(
       srv.request.header.name      = robot_name;
       srv.request.header.topic     = topic;
 
-      srv.request.type       = robot_display_type;
-      srv.request.pose       = robot_pose;
-      srv.request.dimensions = data;
-      srv.request.scaling    = scaling;
-      srv.request.color      = color;
-      srv.request.alpha      = alpha;
-      srv.request.zorder     = zorder;
+      srv.request.type          = robot_display_type;
+      srv.request.display_topic = display_topic;
+      srv.request.pose          = robot_pose;
+      srv.request.dimensions    = data;
+      srv.request.scaling       = scaling;
+      srv.request.color         = color;
+      srv.request.alpha         = alpha;
+      srv.request.zorder        = zorder;
 
       if (_add_robot_client.call(srv)) {
         _robot_names.insert(robot_name);
@@ -111,8 +115,11 @@ void RobotDisplayManager::initialize_single(
         if(!topic.empty()) {
           _rbt_pubs[robot_name] = std::pair<ros::Publisher, geometry_msgs::Pose>();
           _rbt_pubs[robot_name].first = _nh.advertise<geometry_msgs::Pose>(topic, 1);
+        }
 
-          _rbt_pubs[robot_name].second = srv.request.pose;
+        if(!display_topic.empty()) {
+          _disp_pubs[robot_name] = std::pair<ros::Publisher, std_msgs::String>();
+          _disp_pubs[robot_name].first = _nh.advertise<std_msgs::String>(display_topic, 1);
         }
       } else {
         ROS_WARN("Call to Add Robot Service failed");
@@ -125,15 +132,21 @@ void RobotDisplayManager::initialize_single(
   }
 }
 
-void RobotDisplayManager::update(const std::string &rbt_name, 
-  const geometry_msgs::Point &rbt_pt,
-  const geometry_msgs::Quaternion &rbt_orientation)
+void RobotDisplayManager::update_pose(const std::string &rbt_name, 
+  const geometry_msgs::Pose &rbt_pose) 
 {
   if(_rbt_pubs.find(rbt_name) != _rbt_pubs.end()) {
-    _rbt_pubs[rbt_name].second.position    = rbt_pt;
-    _rbt_pubs[rbt_name].second.orientation = rbt_orientation;
-
+    _rbt_pubs[rbt_name].second  = rbt_pose;
     _rbt_pubs[rbt_name].first.publish(_rbt_pubs[rbt_name].second);
+  }
+}
+
+void RobotDisplayManager::update_color(const std::string &rbt_name, 
+    const std::string &color)
+{
+  if(_disp_pubs.find(rbt_name) != _disp_pubs.end()) {
+    _disp_pubs[rbt_name].second.data = color;
+    _disp_pubs[rbt_name].first.publish(_disp_pubs[rbt_name].second);
   }
 }
 

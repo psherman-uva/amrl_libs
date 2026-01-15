@@ -10,6 +10,7 @@ add_library(amrl_display_helpers
 )
 target_link_libraries(
   amrl_display_helpers
+  amrl_robot_helpers
   amrl_mapping
   amrl_obstacle_util
   ${catkin_LIBRARIES}

@@ -20,13 +20,13 @@ RobotData::RobotData(
   setup(nh, robot_label, ros_ns);
 
   // Robot pose subscription
-  _pose_sub = nh.subscribe(robot_label + "/pose", 5, &RobotData::pose_callback, this);
+  _pose_sub = nh.subscribe(robot_label + "/pose", 2, &RobotData::pose_callback, this);
 }
 
 void RobotData::setup_vicon_pose_sub(ros::NodeHandle &nh, const std::string &vicon_obj)
 {
-  _pose_sub.shutdown();
-  _pose_sub = nh.subscribe("/vicon/" + vicon_obj + "/" + vicon_obj, 5, &RobotData::vicon_callback, this);
+  _pose_sub.shutdown(); // shutdown subscriber started in constructor
+  _pose_sub = nh.subscribe("/vicon/" + vicon_obj + "/" + vicon_obj, 2, &RobotData::vicon_callback, this);
 }
 
 void RobotData::setup_pose_pub(ros::NodeHandle &nh, const std::string &pub_topic)
@@ -44,24 +44,24 @@ void RobotData::setup(
   const std::string config_dir = nh.param<std::string>("/config_dir", "");
   const std::string obs_file   = nh.param<std::string>("/obs_file", "");
   const std::string vicon_file = nh.param<std::string>("/vicon_file", "");
-  const bool is_experiment     = nh.param<bool>("/experiment", false);
-  const bool is_lab            = nh.param<bool>("/in_lab", false);
 
   //
   // Occupancy Map & Display
-  // 
-  double kMapWidth      = nh.param<double>(ros_ns + "/map/width", 10);
-  double kMapHeight     = nh.param<double>(ros_ns + "/map/height", 10);
-  double kMapResolution = nh.param<double>(ros_ns + "/map/resolution", 0.1);
-  float kMapOriginX     = nh.param<float>(ros_ns + "/map/origin_x", 0.0);
-  float kMapOriginY     = nh.param<float>(ros_ns + "/map/origin_y", 0.0);
+  //
+
+  double kMapWidth      = nh.param<double>("/map/width", 10);
+  double kMapHeight     = nh.param<double>("/map/height", 10);
+  double kMapResolution = nh.param<double>("/map/resolution", 0.1);
+  float kMapOriginX     = nh.param<float>("/map/origin_x", 0.0);
+  float kMapOriginY     = nh.param<float>("/map/origin_y", 0.0);
   GridInfo kMapInfo({kMapOriginX, kMapOriginY}, kMapWidth, kMapHeight, kMapResolution);
-
   _map         = std::make_shared<OccupancyGrid>(kMapInfo);
-  _map_display = std::make_shared<OccupancyGridDisplay>(nh, robot_label, frame_id , kMapInfo);
 
-  GridCallback display_cb = [this](uint32_t x, uint32_t y, double prob) { _map_display->update_data(x, y, prob); };
-  _map->register_callback(display_cb);
+  if( nh.param<bool>("/map/display", false)) {
+    _map_display = std::make_shared<OccupancyGridDisplay>(nh, robot_label, frame_id , kMapInfo);
+    GridCallback display_cb = [this](uint32_t x, uint32_t y, double prob) { _map_display->update_data(x, y, prob); };
+    _map->register_callback(display_cb);
+  }
 
   //
   // Setup Obstacles
@@ -91,19 +91,22 @@ void RobotData::setup(
   double kLidarSweep      = nh.param<double>(ros_ns + "/lidar/sweep", 2*M_PI);
   int kLidarNumBeams      = nh.param<int>(ros_ns + "/lidar/num_beams", 360);
   bool LidarWithObstacles = nh.param<bool>(ros_ns + "/lidar/sim_with_obs", false); 
+  bool LidarWithMap       = nh.param<bool>(ros_ns + "/lidar/sim_with_map", false); 
 
   if(LidarWithObstacles) {
     _lidar = std::make_shared<LidarSimulatedObstacles>(_obstacles, kLidarRange, kLidarNumBeams, kLidarSweep);
-  } else {
+  } else if (LidarWithMap) {
     _lidar = std::make_shared<LidarSimulatedMap>(_map, kLidarRange, kLidarNumBeams, kLidarSweep);
+  } else {
+    _lidar = nullptr;
   }
 }
 
 void RobotData::cycle(void)
 {
   if(_pose_updated) {
-    util::map_update_from_lidar_scan(_lidar, _map, _pos, _theta);
-    _map_display->publish();
+    if(_lidar) { util::map_update_from_lidar_scan(_lidar, _map, _pos, _theta); }
+    if(_map_display) { _map_display->publish(); }
     _pose_updated = false;
   }
 
