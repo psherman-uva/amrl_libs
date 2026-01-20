@@ -53,9 +53,8 @@ void ObstacleDisplayManager::add_from_setup_data(const std::vector<util::Obstacl
     }
 
     std::string color = o.color.empty() ? kColorMap.at(obs->type_get()) : o.color;
-    double alpha      = o.alpha;
 
-    add_obstacle(obs, req_name, color, alpha);
+    add_obstacle(obs, req_name, color,  o.alpha, o.zorder);
   }
 }
 
@@ -64,6 +63,7 @@ void ObstacleDisplayManager::add_obstacle(std::shared_ptr<Obstacle> obs)
   std::string req_name = "";
   std::string color    = kColorMap.at(obs->type_get());
   double alpha         = 1.0;
+  double zorder        = 3.0;
   
   if(obs->type_get() == Obstacle::ObstacleType::kSolid) {
     req_name = kDefaultObsName + std::to_string(_cnt_obs++);
@@ -73,7 +73,7 @@ void ObstacleDisplayManager::add_obstacle(std::shared_ptr<Obstacle> obs)
     req_name = kDefaultMiscName + std::to_string(_cnt_misc++);
   }
 
-  add_obstacle(obs, req_name, color, alpha);
+  add_obstacle(obs, req_name, color, alpha, zorder);
 }
 
 
@@ -81,21 +81,26 @@ void ObstacleDisplayManager::add_obstacle(
   std::shared_ptr<Obstacle> obs,
   const std::string &obs_name,
   const std::string &color,
-  const double alpha)
+  const double alpha,
+  const double zorder)
 {
   if(_add_poly_client.waitForExistence(ros::Duration(5.0)) && 
       _add_circle_client.waitForExistence(ros::Duration(5.0))) {
     std::string topic = _node_name + obs_name;
     std::vector<double> obs_info = obs->data_get();
+
+    amrl_display::ElementConfig config;
+    config.color  = color;
+    config.fill   = true;
+    config.alpha  = alpha;
+    config.zorder = zorder;
     
     if(obs->shape_get() == ObstacleShape::ShapeType::kCircle) {
+
       _circle_srv.request.header.fig_label = _fig_label;
       _circle_srv.request.header.name      = obs_name;
       _circle_srv.request.header.topic     = topic;
-      
-      _circle_srv.request.config.alpha = alpha;
-      _circle_srv.request.config.color = color;
-      _circle_srv.request.config.fill  = true;
+      _circle_srv.request.config           = config;
 
       _circle_srv.request.center.x = obs_info[0];
       _circle_srv.request.center.y = obs_info[1];
@@ -118,10 +123,7 @@ void ObstacleDisplayManager::add_obstacle(
       _poly_srv.request.header.fig_label = _fig_label;
       _poly_srv.request.header.name      = obs_name;
       _poly_srv.request.header.topic     = topic;
-      
-      _poly_srv.request.config.alpha = alpha;
-      _poly_srv.request.config.color = color;
-      
+      _poly_srv.request.config           = config;
       
       _poly_srv.request.vertices.resize(n);
       for (size_t i = 0; i < n; ++i) {

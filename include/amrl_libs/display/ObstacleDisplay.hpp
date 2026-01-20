@@ -36,19 +36,20 @@ public:
     std::shared_ptr<Obstacle> obs,
     const std::string &obs_name,
     const std::string &color,
-    const double alpha);
+    const double alpha,
+    const double zorder);
 
   void update_circle_obs(
     const std::string &obs_name,
     const Point<double> &pos,
     const std::string &color = "",
-    const double alpha = 0.0);
+    const double alpha       = 0.0);
 
   void update_polygon_obs(
     const std::string &obs_name,
     const std::vector<Point<double>> &vertices,
     const std::string &color = "",
-    const double alpha = 0.0);
+    const double alpha       = 0.0);
 
   void remove_obs(const std::string &obs_name);
 

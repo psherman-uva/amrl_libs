@@ -37,12 +37,10 @@ struct ObstacleSetupData
 
   // For Circle shape obstacle
   double radius = 0.0;
-
-  // Color String for display puposes
-  std::string color;
-
-  // Alpha value for display purposes
-  double alpha = 1.0;
+  
+  std::string color;    // Color String for display puposes
+  double alpha  = 1.0;  // Alpha value for display purposes
+  double zorder = 3.0;  // Z-order on display
 
   // Extra info
   std::map<std::string, double> extra_info;

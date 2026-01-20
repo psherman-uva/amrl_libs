@@ -299,6 +299,12 @@ std::vector<ObstacleSetupData> obs_data_from_json_obj(nlohmann::json &obs_json, 
       obs.alpha = 1.0;
     }
 
+    if(it->contains("zorder")) {
+      obs.zorder = it->at("zorder");
+    } else {
+      obs.zorder = 2.0;
+    }
+
     obs.type = obs_type;
     if(obs.type == Obstacle::ObstacleType::kVibration) {
       obs.extra_info["roughness"] = it->at("roughness");
