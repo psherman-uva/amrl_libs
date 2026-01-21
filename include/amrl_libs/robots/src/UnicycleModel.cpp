@@ -51,9 +51,9 @@ void UnicycleModel::drive(const Eigen::VectorXd &u)
   }
 
   if (fabs(_theta_velocity - _x0[2]) > M_PI_4)
-    _linear_velocity = -1*sqrt(pow(_x0[3], 2) + pow(_x0[4], 2));
+    _linear_velocity = -1*sqrt(util::square(_x0[3]) + util::square(_x0[4]));
   else
-    _linear_velocity = sqrt(pow(_x0[3], 2) + pow(_x0[4], 2));
+    _linear_velocity = sqrt(util::square(_x0[3]) + util::square(_x0[4]));
 
   UgvBase::state_set_manually({_x0[0], _x0[1]}, _x0[2]);
 }
@@ -95,7 +95,7 @@ void UnicycleModel::modify_u(const Eigen::VectorXd &u0)
 
 UnicycleModel::X_t UnicycleModel::x_dot(const X_t &x, const U_t &u)
 {
-  double v  = sqrt(pow(x[3], 2) + pow(x[4], 2));
+  double v  = sqrt(util::square(x[3]) + util::square(x[4]));
   double ct = cos(x[2]);
   double st = sin(x[2]);
 

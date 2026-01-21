@@ -54,12 +54,12 @@ std::pair<bool, double> CircleObstacle::ray_crossing(const Point<double> &pt1, c
 
   Point<double> v = p2 - p1;
   double v_norm   = util::norm(v);
-  double v_norm_2 = pow(v_norm, 2.0);
+  double v_norm_2 = util::square(v_norm);
   
   double dot      = util::dot_product(p1, v);
-  double dot_2    = pow(dot, 2.0);
+  double dot_2    = util::square(dot);
 
-  double delta    = 4*dot_2 - 4*v_norm_2*(pow(util::norm(p1), 2.0) - pow(_radius, 2.0));
+  double delta    = 4*dot_2 - 4*v_norm_2*(util::square(util::norm(p1)) - util::square(_radius));
   if(std::abs(delta) < kEps) { delta = 0.0; } // Deal with floating point rounding errors
 
   if(delta >= 0.0) {
