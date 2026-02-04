@@ -1,7 +1,7 @@
 
 #include <amrl_libs/mapping/GridGraph.hpp>
-
 #include <amrl_common/util/util.hpp>
+
 #include <iostream>
 
 
@@ -147,8 +147,6 @@ void GridGraph::node_free_update(const uint32_t idx)
       }
     }
   }
-
-
 }
 
 void GridGraph::index_connected_neighborhood(std::set<uint32_t>& neighborhood, const uint32_t idx, const uint32_t step)
@@ -172,7 +170,6 @@ void GridGraph::index_full_neighborhood(std::set<uint32_t>& neighborhood, const 
     }
   }
 }
-
 
 uint32_t GridGraph::get_neighbor(uint32_t idx, uint32_t nbr) const
 {
@@ -227,6 +224,20 @@ double GridGraph::get_default_edge_cost(uint32_t idx, uint32_t nbr) const
   } 
   return sqrt(2.0);
 }
+
+bool GridGraph::index_is_occupied(uint32_t idx) const
+{
+  if(idx < _graph.size()) {
+    return _graph[idx]->edges.empty();
+  }
+  return true;
+}
+
+bool GridGraph::cell_is_occupied(const Point<uint32_t> &cell) const
+{
+  uint32_t idx = _map->cell_to_index(cell);
+  return index_is_occupied(idx);
+} 
 
 bool GridGraph::bottom_row_check(const uint32_t idx) const
 {

@@ -48,14 +48,13 @@ void RobotData::setup(
   //
   // Occupancy Map & Display
   //
-
   double kMapWidth      = nh.param<double>("/map/width", 10);
   double kMapHeight     = nh.param<double>("/map/height", 10);
   double kMapResolution = nh.param<double>("/map/resolution", 0.1);
   float kMapOriginX     = nh.param<float>("/map/origin_x", 0.0);
   float kMapOriginY     = nh.param<float>("/map/origin_y", 0.0);
   GridInfo kMapInfo({kMapOriginX, kMapOriginY}, kMapWidth, kMapHeight, kMapResolution);
-  _map         = std::make_shared<OccupancyGrid>(kMapInfo);
+  _map = std::make_shared<OccupancyGrid>(kMapInfo);
 
   if( nh.param<bool>("/map/display", false)) {
     _map_display = std::make_shared<OccupancyGridDisplay>(nh, robot_label, frame_id , kMapInfo);

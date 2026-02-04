@@ -57,8 +57,24 @@ public:
   /// @return XY cell of map
   Point<uint32_t> index_to_cell(uint32_t idx) const;
 
+  /// Check if the corresponding node at an index is connected. 
+  /// False if node is occuppied or within unsafe buffer zone.
+  /// @param idx Index of node to check 
+  /// @return True if node is connected to neighbors
+  bool index_is_occupied(uint32_t idx) const;
+
+  /// Check if the corresponding node at cell is connected. 
+  /// False if node is occuppied or within unsafe buffer zone.
+  /// @param cell Cell to check 
+  /// @return True if node is connected to neighbors
+  bool cell_is_occupied(const Point<uint32_t> &cell) const;
+
   /// Get the raw pointer to the underlying map
   std::shared_ptr<OccupancyGrid> get_map(void);
+
+  /// Debugging method that will print each each node and it's
+  /// current edges
+  void print_graph(void);
 
 private:
 
@@ -143,9 +159,7 @@ private:
   /// @return True if node along right side
   bool right_side_check(const uint32_t idx) const;
 
-  /// Debugging method that will print each each node and it's
-  /// current edges
-  void print_graph(void);
+
 
   // ----------------------------------- //
   // --     Class Member Objects      -- //

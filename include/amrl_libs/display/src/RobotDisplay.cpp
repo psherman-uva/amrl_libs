@@ -20,7 +20,7 @@ RobotDisplayManager::RobotDisplayManager(ros::NodeHandle &nh, const std::string 
   _fig_label(figure_label)
 {
   _add_robot_client = _nh.serviceClient<amrl_display::AddRobot>("/display/add_robot");
-  _del_client      = _nh.serviceClient<amrl_display::DeleteElement>("/display/delete_element");
+  _del_client       = _nh.serviceClient<amrl_display::DeleteElement>("/display/delete_element");
 }
 
 void RobotDisplayManager::set_figure_label(const std::string &figure_label)

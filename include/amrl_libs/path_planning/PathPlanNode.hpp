@@ -23,7 +23,7 @@ struct PathPlanEdge;
 struct PathPlanNode
 {
   uint32_t id;                     // Label for node
-  std::vector<PathPlanEdge> edges; // Edges to all neighbors in graphs
+  std::vector<PathPlanEdge> edges; // Edges to all neighbors in graph
   double dist_cost;                // Current best distance cost to reach node
 
   PathPlanNode(void) :
