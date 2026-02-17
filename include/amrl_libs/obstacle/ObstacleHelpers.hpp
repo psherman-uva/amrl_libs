@@ -48,6 +48,11 @@ struct ObstacleSetupData
 
 std::shared_ptr<Obstacle> obs_from_setup_data(const ObstacleSetupData &obs_data);
 std::vector<std::shared_ptr<Obstacle>> obstacles_from_file(const std::string &json_file);
+std::vector<std::shared_ptr<Obstacle>> obstacles_type_from_file(
+  const std::string &json_file,
+  const std::string &obs_key,
+  const Obstacle::ObstacleType obs_type);
+
 
 Obstacle solid_obs_from_setup_data(const ObstacleSetupData &obs_data);
 
@@ -64,6 +69,8 @@ std::vector<Obstacle> solid_obstacles_from_file(const std::string &json_file);
 std::vector<Obstacle> obstacles_with_vicon(
   ros::NodeHandle &nh, 
   const std::string &json_file);
+
+
 std::map<std::string, std::vector<double>> obstacle_vicon_data(ros::NodeHandle &nh, const std::string &filename);
 
 /// Parse a JSON file to get obstacle names and nominal coordinates
@@ -76,8 +83,6 @@ std::vector<ObstacleSetupData> obstacle_data_from_file(const std::string &json_f
 /// @return Container of features point coordinates
 std::vector<Point<double>> features_from_obs_file(const std::string &json_file);
 
-
-bool topic_is_advertised(const std::string &topic);
 
 } // namespace util
 } // namespace amrl

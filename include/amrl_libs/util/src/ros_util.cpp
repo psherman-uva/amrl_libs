@@ -326,56 +326,12 @@ void map_update_from_lidar_ray(
   map->update_odds(free_cells, occ_cells);
 }
 
-std::vector<Obstacle> map_setup(ros::NodeHandle &nh, 
-  const std::string &obs_file, 
-  const std::string &frame_id, 
-  std::shared_ptr<OccupancyGrid> map)
-{
-  if (obs_file.empty()) { return std::vector<Obstacle>(); }
-
-  auto obs = util::solid_obstacles_from_file(obs_file);
-  for (const auto &o : obs) {
-    std::vector<Point<uint32_t>> obs_cells = map->cells_in_obstacle(o);
-    for (uint8_t i = 0; i < 5; ++i) { map->update_odds({}, obs_cells); }
-  }
-
-  return obs;
-}
-
-bool logging_full_setup(
-  ros::NodeHandle &nh,
-  ros::Publisher &data_pub,
-  amrl_logging::LoggingData &data,
-  const std::string &table_name,
-  const std::string &topic_name,
-  const std::vector<std::string> &labels_header,
-  const std::vector<std::string> &ints_header,
-  const std::vector<std::string> &reals_header,
-  bool delete_table)
-{
-  const std::string kDataTopic = ros::this_node::getName() + "/" + topic_name;
-
-  if(delete_table && !amrl::logging_delete_table(nh, table_name)) { return false; }
-  if(!amrl::logging_setup(nh, table_name, kDataTopic, labels_header, ints_header, reals_header)) { return false; }
-
-  data_pub = nh.advertise<amrl_logging::LoggingData>(kDataTopic, 50);
-
-  data.labels.resize(labels_header.size());
-  data.nums.resize(ints_header.size());
-  data.reals.resize(reals_header.size());
-
-  for (int i = 0; i < 15; ++i) { ros::Rate(10).sleep(); } // Takes a second for logging to get started.
-
-  return true;
-}
-
-
 std::vector<std::string> robot_names_from_file(const std::string &full_rbt_file)
 {
   std::vector<std::string> rbt_names;
   
   if(!full_rbt_file.empty()) {
-    ROS_INFO("Getting Robots from file: %s", full_rbt_file.c_str());
+    ROS_DEBUG("Getting Robots from file: %s", full_rbt_file.c_str());
 
     std::ifstream f(full_rbt_file);
     if(f.is_open()) {
@@ -391,6 +347,17 @@ std::vector<std::string> robot_names_from_file(const std::string &full_rbt_file)
     ROS_WARN("Robot file empty: %s", full_rbt_file.c_str());
   }
   return rbt_names;
+}
+
+bool topic_is_advertised(const std::string &topic)
+{
+  ros::master::V_TopicInfo master_topics;
+  if(ros::master::getTopics(master_topics)) {
+    return std::any_of(master_topics.begin(), master_topics.end(),
+              [&topic](const ros::master::TopicInfo &tpc)->bool { 
+                return tpc.name == topic; });
+  }
+  return false;
 }
 
 bool param_namespace_exists(const std::string &ns)

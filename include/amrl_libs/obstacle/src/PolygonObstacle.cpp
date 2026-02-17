@@ -8,10 +8,10 @@
 
 namespace amrl {
 
-PolygonObstacle::PolygonObstacle(const std::vector<Point<double>> &coordinates)
-  : ObstacleShape(ShapeType::kPolygon),
-    _coordinates(coordinates),
-    kNumCoords(coordinates.size())
+PolygonObstacle::PolygonObstacle(const std::vector<Point<double>> &coordinates) : 
+  ObstacleShape(ShapeType::kPolygon),
+  _coordinates(coordinates),
+  kNumCoords(coordinates.size())
 {
   set_min_max_values();
 }

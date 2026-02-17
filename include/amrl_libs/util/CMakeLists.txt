@@ -6,7 +6,6 @@ target_link_libraries(amrl_psherman_util
   amrl_util
   amrl_mapping
   amrl_lidar
-  amrl_obstacle_util
   amrl_logging_util
   # approx_cdf
   ${catkin_LIBRARIES})

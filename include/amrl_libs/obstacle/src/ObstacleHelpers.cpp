@@ -2,6 +2,7 @@
 #include <amrl_libs/obstacle/ObstacleHelpers.hpp>
 #include <amrl_libs/obstacle/DynamicObstacle.hpp>
 #include <amrl_libs/obstacle/VibrationObstacle.hpp>
+#include <amrl_libs/util/ros_util.hpp>
 
 #include <nlohmann/json.hpp>
 
@@ -14,14 +15,94 @@
 namespace amrl {
 namespace util {
 
-std::vector<ObstacleSetupData> obs_data_from_json_obj(nlohmann::json &obs_json, const Obstacle::ObstacleType obs_type);
-
 void obstacleCallback(const geometry_msgs::TransformStamped::ConstPtr &msg, ObstacleSetupData &obs_data)
 {
   obs_data.pos_set = true;
   obs_data.x       = msg->transform.translation.x;
   obs_data.y       = msg->transform.translation.y;
   obs_data.theta   = tf::getYaw(msg->transform.rotation);
+}
+
+std::vector<ObstacleSetupData> obs_data_from_json_obj(nlohmann::json &obs_json, const Obstacle::ObstacleType obs_type)
+{
+   using json = nlohmann::json;
+
+  std::vector<ObstacleSetupData> obstacles;
+
+  for(json::iterator it = obs_json.begin(); it != obs_json.end(); ++it) {
+    ObstacleSetupData obs;
+
+    if(it->contains("shape") && (it->at("shape") == "circle")) {
+      obs.shape = ObstacleShape::ShapeType::kCircle;
+    } else {
+      obs.shape = ObstacleShape::ShapeType::kPolygon;
+    }
+
+    if(obs.shape == ObstacleShape::ShapeType::kPolygon) {
+      json vertices = it->at("vertices");
+      for(json::iterator iit = vertices.begin(); iit != vertices.end(); ++iit) {
+        amrl::Point<double> p(iit.value()[0], iit.value()[1]);
+        obs.vertices.push_back(p);
+      }
+    } else {
+      obs.radius = it->at("radius");
+    }
+ 
+    if(it->contains("offset")) {
+      obs.x = it->at("offset")[0];
+      obs.y = it->at("offset")[1];
+    } else {
+      obs.x = 0.0;
+      obs.y = 0.0;
+    }
+
+    if(it->contains("heading")) {
+      obs.theta = it->at("heading");
+    } else {
+      obs.theta = 0.0;
+    }
+
+    if(it->contains("label")) {
+      obs.label = it->at("label");
+    } else {
+      obs.label = "obs" + std::to_string(obstacles.size());
+    }
+
+    if(it->contains("detectable")) {
+      obs.detectable = it->at("detectable");
+    } else {
+      obs.detectable = true;
+    }
+
+    if(it->contains("color")) {
+      obs.color = it->at("color");
+    } else {
+      obs.color = "";
+    }
+
+    if(it->contains("alpha")) {
+      obs.alpha = it->at("alpha");
+    } else {
+      obs.alpha = 1.0;
+    }
+
+    if(it->contains("zorder")) {
+      obs.zorder = it->at("zorder");
+    } else {
+      obs.zorder = 2.0;
+    }
+
+    obs.type = obs_type;
+    if(obs.type == Obstacle::ObstacleType::kVibration) {
+      if(it->contains("roughness")) {
+        obs.extra_info["roughness"] = it->at("roughness");
+      }
+    } 
+
+    obstacles.push_back(obs);
+  }
+
+  return obstacles;
 }
 
 std::shared_ptr<Obstacle> obs_from_setup_data(const ObstacleSetupData &obs_data)
@@ -31,12 +112,10 @@ std::shared_ptr<Obstacle> obs_from_setup_data(const ObstacleSetupData &obs_data)
     
     double ct = cos(obs_data.theta);
     double st = sin(obs_data.theta);
-    double x  = obs_data.x;
-    double y  = obs_data.y;
 
     for(auto &p : vertices) {
-      double xa = p.x*ct - p.y*st + x;
-      double ya = p.x*st + p.y*ct + y;
+      double xa = p.x*ct - p.y*st + obs_data.x;
+      double ya = p.x*st + p.y*ct + obs_data.y;
       p.x = xa;
       p.y = ya;
     }
@@ -48,7 +127,7 @@ std::shared_ptr<Obstacle> obs_from_setup_data(const ObstacleSetupData &obs_data)
     } else if (obs_data.type == Obstacle::ObstacleType::kVibration) { 
       return std::make_shared<VibrationObstacle>(vertices, obs_data.extra_info.at("roughness"));
     } else {
-      return std::make_shared<Obstacle>(Obstacle::ObstacleType::kDoor, vertices);
+      return std::make_shared<Obstacle>(Obstacle::ObstacleType::kMisc, vertices);
     }
   } else {
     if (obs_data.type == Obstacle::ObstacleType::kSolid) {
@@ -58,7 +137,7 @@ std::shared_ptr<Obstacle> obs_from_setup_data(const ObstacleSetupData &obs_data)
     } else if (obs_data.type == Obstacle::ObstacleType::kVibration) { 
       return std::make_shared<VibrationObstacle>(Point<double>(obs_data.x, obs_data.y), obs_data.radius, obs_data.extra_info.at("roughness"));
     } else {
-      return std::make_shared<Obstacle>(Obstacle::ObstacleType::kDoor, Point<double>(obs_data.x, obs_data.y), obs_data.radius);
+      return std::make_shared<Obstacle>(Obstacle::ObstacleType::kMisc, Point<double>(obs_data.x, obs_data.y), obs_data.radius);
     }
   }
 }
@@ -195,34 +274,25 @@ std::vector<ObstacleSetupData> obstacle_data_from_file(const std::string &json_f
 {
   using json = nlohmann::json;
 
+  static const std::vector<std::pair<std::string, Obstacle::ObstacleType>> obs_pairs({
+    {"obstacles",  Obstacle::ObstacleType::kSolid},
+    {"dynamic",    Obstacle::ObstacleType::kDynamic},
+    {"vibration",  Obstacle::ObstacleType::kVibration},
+    {"hazards",    Obstacle::ObstacleType::kMisc}
+  });
+
   std::ifstream f(json_file, std::ifstream::in);
   if(f.is_open()) {
     json data = json::parse(f);
     if(!data.empty()) { 
       std::vector<ObstacleSetupData> obs_data;
 
-      if(data.contains("obstacles")) {
-        json obs_json = data["obstacles"];
-        std::vector<ObstacleSetupData> solid_obs = obs_data_from_json_obj(obs_json, Obstacle::ObstacleType::kSolid);
-        obs_data.insert(obs_data.end(), solid_obs.begin(), solid_obs.end());
-      } 
-
-      if(data.contains("dynamic")) {
-        json obs_json = data["dynamic"];
-        std::vector<ObstacleSetupData> dyn_obs = obs_data_from_json_obj(obs_json, Obstacle::ObstacleType::kDynamic);
-        obs_data.insert(obs_data.end(), dyn_obs.begin(), dyn_obs.end());
-      }
-
-      if(data.contains("vibration")) {
-        json obs_json = data["vibration"];
-        std::vector<ObstacleSetupData> misc_obs = obs_data_from_json_obj(obs_json, Obstacle::ObstacleType::kVibration);
-        obs_data.insert(obs_data.end(), misc_obs.begin(), misc_obs.end());
-      }
-
-      if(data.contains("misc")) {
-        json obs_json = data["misc"];
-        std::vector<ObstacleSetupData> misc_obs = obs_data_from_json_obj(obs_json, Obstacle::ObstacleType::kDoor);
-        obs_data.insert(obs_data.end(), misc_obs.begin(), misc_obs.end());
+      for(const auto &op : obs_pairs) {
+        if(data.contains(op.first)) {
+          json obs_json = data[op.first];
+          std::vector<ObstacleSetupData> obs = obs_data_from_json_obj(obs_json, op.second);
+          obs_data.insert(obs_data.end(), obs.begin(), obs.end());
+        }
       }
 
       return obs_data;
@@ -236,84 +306,37 @@ std::vector<ObstacleSetupData> obstacle_data_from_file(const std::string &json_f
   return {};
 }
 
-std::vector<ObstacleSetupData> obs_data_from_json_obj(nlohmann::json &obs_json, const Obstacle::ObstacleType obs_type)
+
+
+std::vector<std::shared_ptr<Obstacle>> obstacles_type_from_file(
+  const std::string &json_file,
+  const std::string &obs_key,
+  const Obstacle::ObstacleType obs_type)
 {
   using json = nlohmann::json;
 
-  std::vector<ObstacleSetupData> obstacles;
+  std::ifstream f(json_file, std::ifstream::in);
+  if(f.is_open()) {
+    json data = json::parse(f);
+    if(!data.empty() && data.contains(obs_key)) { 
 
-  for(json::iterator it = obs_json.begin(); it != obs_json.end(); ++it) {
-    ObstacleSetupData obs;
-
-    if(it->contains("shape") && (it->at("shape") == "circle")) {
-      obs.shape = ObstacleShape::ShapeType::kCircle;
-    } else {
-      obs.shape = ObstacleShape::ShapeType::kPolygon;
-    }
-
-    if(obs.shape == ObstacleShape::ShapeType::kPolygon) {
-      json vertices = it->at("vertices");
-      for(json::iterator iit = vertices.begin(); iit != vertices.end(); ++iit) {
-        amrl::Point<double> p(iit.value()[0], iit.value()[1]);
-        obs.vertices.push_back(p);
+      json obs_json = data[obs_key];
+      std::vector<ObstacleSetupData> obs_data = obs_data_from_json_obj(obs_json, obs_type);
+      
+      std::vector<std::shared_ptr<Obstacle>> obs;
+      for(const auto &o : obs_data) {
+        obs.push_back(obs_from_setup_data(o));
       }
+      return obs;
+      
     } else {
-      obs.radius = it->at("radius");
+      ROS_WARN("Invalid JSON file: %s", json_file.c_str()); 
     }
- 
-    if(it->contains("offset")) {
-      obs.x = it->at("offset")[0];
-      obs.y = it->at("offset")[1];
-    } else {
-      obs.x = 0.0;
-      obs.y = 0.0;
-    }
-
-    if(it->contains("heading")) {
-      obs.theta = it->at("heading");
-    } else {
-      obs.theta = 0.0;
-    }
-
-    if(it->contains("label")) {
-      obs.label = it->at("label");
-    } else {
-      obs.label = "obs" + std::to_string(obstacles.size());
-    }
-
-    if(it->contains("detectable")) {
-      obs.detectable = it->at("detectable");
-    } else {
-      obs.detectable = true;
-    }
-
-    if(it->contains("color")) {
-      obs.color = it->at("color");
-    } else {
-      obs.color = "";
-    }
-
-    if(it->contains("alpha")) {
-      obs.alpha = it->at("alpha");
-    } else {
-      obs.alpha = 1.0;
-    }
-
-    if(it->contains("zorder")) {
-      obs.zorder = it->at("zorder");
-    } else {
-      obs.zorder = 2.0;
-    }
-
-    obs.type = obs_type;
-    if(obs.type == Obstacle::ObstacleType::kVibration) {
-      obs.extra_info["roughness"] = it->at("roughness");
-    } 
-
-    obstacles.push_back(obs);
+  } else {
+    ROS_WARN("JSON file NOT open (likely invalid filename): %s", json_file.c_str()); 
   }
 
-  return obstacles;
+  return {};
 }
 
 std::vector<Point<double>> features_from_obs_file(const std::string &json_file)
@@ -333,18 +356,6 @@ std::vector<Point<double>> features_from_obs_file(const std::string &json_file)
 
   return features;
 }
-
-bool topic_is_advertised(const std::string &topic)
-{
-  ros::master::V_TopicInfo master_topics;
-  if(ros::master::getTopics(master_topics)) {
-    for(const auto &tpc : master_topics) {
-      if(tpc.name == topic) { return true; } 
-    }
-  }
-  return false;
-}
-
 
 } // namespace util
 } // namespace amrl

@@ -47,7 +47,7 @@ std::vector<RobotSetupdata> robot_setup_from_json(const std::string &json_file)
 
   std::ifstream f(json_file);
   if (f.is_open()) {
-    ROS_INFO("Robots from file: %s", json_file.c_str());
+    ROS_DEBUG("Robots from file: %s", json_file.c_str());
 
     nlohmann::json data = nlohmann::json::parse(f)["robots"];
     for(nlohmann::json::iterator it = data.begin(); it != data.end(); ++it) {

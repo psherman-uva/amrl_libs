@@ -26,7 +26,7 @@ public:
     kSolid     = 0,
     kDynamic   = 1,
     kVibration = 2,
-    kDoor      = 3,
+    kMisc      = 3,
   };
 
   Obstacle(const ObstacleType type, const std::vector<Point<double>> &coordinates);

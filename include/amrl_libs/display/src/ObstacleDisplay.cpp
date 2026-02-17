@@ -12,7 +12,7 @@ std::map<Obstacle::ObstacleType, std::string> ObstacleDisplayManager::kColorMap(
   {Obstacle::ObstacleType::kSolid,     "#000000"},
   {Obstacle::ObstacleType::kDynamic,   "#047d0c"},
   {Obstacle::ObstacleType::kVibration, "#eb7d34"},
-  {Obstacle::ObstacleType::kDoor,      "#0f42ba"}
+  {Obstacle::ObstacleType::kMisc,      "#0f42ba"}
 });
 
 ObstacleDisplayManager::ObstacleDisplayManager(ros::NodeHandle &nh, const std::string &figure_label)
