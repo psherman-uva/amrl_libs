@@ -4,9 +4,6 @@
 #include <amrl_common/util/util.hpp>
 #include <amrl_common/util/bresenham_line.hpp>
 
-#include <logging_util/util.hpp>
-#include <amrl_logging/LoggingData.h>
-
 #include <ros/master.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf2/LinearMath/Quaternion.h>

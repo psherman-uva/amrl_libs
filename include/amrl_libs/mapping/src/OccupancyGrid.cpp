@@ -158,4 +158,19 @@ void OccupancyGrid::register_callback(GridCallback func)
   _callbacks.push_back(std::move(func));
 }
 
+void OccupancyGrid::add_solid_obstacle(const Obstacle &obs)
+{
+  std::vector<Point<uint32_t>> obs_cells = cells_in_obstacle(obs);
+  if(obs_cells.size() > 0) {
+    while(!cell_is_occupied(obs_cells[0])) {
+      update_odds({}, obs_cells);
+    }
+
+    // Do another few times, just for fun.
+    for (uint8_t i = 0; i < 5; ++i) { 
+      update_odds({}, obs_cells);
+    }
+  }
+}
+
 } // namespace amrl

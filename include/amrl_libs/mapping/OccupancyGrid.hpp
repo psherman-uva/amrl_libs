@@ -107,6 +107,9 @@ public:
   /// @return True if point probability is below free space threshold
   bool point_is_free(const Point<double> &pt) const;
 
+  /// Add solid obstacle to the the occupied cells.
+  void add_solid_obstacle(const Obstacle &obs);
+
 private:
 
   void index_value_updated(const uint32_t idx, const Point<uint32_t> &p);

@@ -25,10 +25,9 @@ PID::PID(const double Kp, const double Ki, const double Kd, const bool use_prev_
 {
 }
 
-double PID::loop(const double setpoint, const double measurement, const double dt)
+double PID::loop(const double error, const double dt)
 {
   // Calculate error values
-  double error = setpoint - measurement;
   _integral_sum += dt*(error + _previous_err)/2.0;
   double derivative = (error - _previous_err)/dt;
 
@@ -47,12 +46,7 @@ double PID::loop(const double setpoint, const double measurement, const double d
     _output_d = std::fmin(_derivative_limit, std::fmax(-_derivative_limit, _output_d));
   }
   
-  double u = 0;
-  if(_use_prev_u) {
-    u = _previous_u + _output_p + _output_i + _output_d;
-  } else {
-    u = _output_p + _output_i + _output_d;
-  }
+  double u = _output_p + _output_i + _output_d;
 
   // Cache values for next loop
   _previous_err = error;

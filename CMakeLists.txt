@@ -20,12 +20,17 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   message_generation
-  amrl_display
-  amrl_logging
   amrl_common
+  amrl_logging
+  ## Optional sub-packages. If not found, CMake will just ignore any
+  ## directories with that particular dependencies
+  OPTIONAL_COMPONENTS
+  amrl_display
 )
 find_package(Threads) # Find c++ threads library
 find_package(Boost)   # Boost software libraries
+
+# catkin_ALL_FOUND_COMPONENTS = roscpp;rospy;roslaunch;tf2_ros;std_msgs;geometry_msgs;message_generation;amrl_common;amrl_display
 
 ## Specify additional locations of header files
 include_directories(
@@ -33,6 +38,18 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include
   ${catkin_INCLUDE_DIRS})
 
+################################################
+## Declare ROS messages, services and actions ##
+################################################
+
+add_message_files(DIRECTORY ${PROJECT_SOURCE_DIR}/ros_msg
+  FILES
+  Circle.msg
+  CircleList.msg
+  FloatVector.msg
+)
+
+generate_messages(DEPENDENCIES std_msgs geometry_msgs)
 
 ###################################
 ## catkin specific configuration ##

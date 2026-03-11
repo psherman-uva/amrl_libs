@@ -27,8 +27,6 @@ public:
   /// @return Obstacle shape type (polygon vs. circle)
   ShapeType shape_type(void) const;
 
-  virtual std::vector<double> data(void) const = 0;
-
   /// Get max & min coordinates that describe a bounding box around the obstacle
   /// @note Values are returned by reference
   /// @param min_x Minimum x-coordinate of obstacle
@@ -36,6 +34,10 @@ public:
   /// @param min_y Minimum y-coordinate of obstacle
   /// @param max_y Maximum y-coordinate of obstacle
   void min_max_coordinates(double &min_x, double &max_x, double &min_y, double &max_y) const;
+
+  std::vector<Point<double>> coordinates(void) const;
+
+  virtual std::vector<double> data(void) const = 0;
 
   /// Check if a point is inside the obstacle defining polygon
   /// @param p Point to check if in obstacle
@@ -63,6 +65,11 @@ public:
   virtual void update_position(const Eigen::Vector2d &pos_delta) = 0;
 
 protected:
+
+  // Finite number of points that define the boundary of the obstacle.
+  // For polygon, will be the vertices.
+  // For cirlcle, will be an approximation using some number of points around the circumference.
+  std::vector<Point<double>> _coordinates;
 
   // Maximum & minimum coordinates of vertices. Creates a bounding box around obstacle
   double _max_X;

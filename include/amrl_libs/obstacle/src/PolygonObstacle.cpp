@@ -10,9 +10,9 @@ namespace amrl {
 
 PolygonObstacle::PolygonObstacle(const std::vector<Point<double>> &coordinates) : 
   ObstacleShape(ShapeType::kPolygon),
-  _coordinates(coordinates),
   kNumCoords(coordinates.size())
 {
+  _coordinates = coordinates;
   set_min_max_values();
 }
 
@@ -184,7 +184,7 @@ std::pair<bool, double> PolygonObstacle::ray_crossing(const Point<double> &p1, c
 
 void PolygonObstacle::update_position(const Eigen::Vector2d &pos_delta)
 {
-  for(auto &p : _coordinates) {
+  for(auto &p : _coordinates) { // Updates in place
     p.x += pos_delta[0];
     p.y += pos_delta[1];
   }

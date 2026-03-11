@@ -48,6 +48,8 @@ public:
 
 private:
 
+  void calculate_coordinates(void);
+
   /// Center of the obstacle
   Point<double> _center;
 
@@ -55,6 +57,8 @@ private:
   double _radius;
 
 
+  static constexpr size_t kNumCoords = 100;
+  static constexpr double kCoordStep = 2 * M_PI / kNumCoords;
 };
 
 

@@ -25,8 +25,9 @@ public:
   enum class ObstacleType : uint8_t {
     kSolid     = 0,
     kDynamic   = 1,
-    kVibration = 2,
-    kMisc      = 3,
+    kHazard    = 2,
+    kVibration = 3,
+    kMisc      = 4,
   };
 
   Obstacle(const ObstacleType type, const std::vector<Point<double>> &coordinates);

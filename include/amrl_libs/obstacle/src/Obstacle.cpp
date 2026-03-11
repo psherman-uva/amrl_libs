@@ -34,15 +34,7 @@ Obstacle::Obstacle(const Point<double> center, const double radius) :
 
 std::vector<Point<double>> Obstacle::coordinates(void) const
 {
-  std::vector<double> data = _pimpl->data();
-
-  std::vector<Point<double>> coords(data.size()/2);
-  for(size_t i = 0; i < coords.size(); ++i) {
-    coords[i].x = data[2*i];
-    coords[i].y = data[2*i + 1];
-  }
-
-  return coords;
+  return _pimpl->coordinates();
 }
 
 Obstacle::ObstacleType Obstacle::type_get(void) const

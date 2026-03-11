@@ -79,8 +79,7 @@ void RobotData::setup(
   }
 
   for (const auto &o : _obstacles) {
-    std::vector<Point<uint32_t>> obs_cells = _map->cells_in_obstacle(o);
-    for (uint8_t i = 0; i < 5; ++i) { _map->update_odds({}, obs_cells); }
+    _map->add_solid_obstacle(o);
   }
 
   //

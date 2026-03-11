@@ -1,4 +1,6 @@
-add_subdirectory(display)
+if(amrl_display_FOUND)
+    add_subdirectory(display)
+endif()
 add_subdirectory(filter)
 add_subdirectory(lidar)
 add_subdirectory(mapping)

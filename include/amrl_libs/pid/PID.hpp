@@ -24,10 +24,9 @@ public:
   ~PID(void) = default;
 
   /// Run a single loop of a PID controller
-  /// @param  setpoint The reference or desired setpoint of the system
-  /// @param  measurement The current measured value of the systems
+  /// @param  error The different between desired setpoint and current value
   /// @param  dt The time step since the last loop update
-  double loop(const double setpoint, const double measurement, const double dt);
+  double loop(const double error, const double dt);
 
   /// Resets PID controller to an initial state
   void reset(void);

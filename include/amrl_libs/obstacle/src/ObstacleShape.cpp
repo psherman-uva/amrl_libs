@@ -22,4 +22,9 @@ void ObstacleShape::min_max_coordinates(double &min_x, double &max_x, double &mi
   max_y = _max_Y;
 }
 
+std::vector<Point<double>> ObstacleShape::coordinates(void) const
+{
+  return _coordinates;
+}
+
 }

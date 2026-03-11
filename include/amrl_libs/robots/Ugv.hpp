@@ -230,8 +230,8 @@ private:
   std::normal_distribution<double> _angular_distribution;
   std::normal_distribution<double> _linear_distribution;
 
-  static constexpr double kLinDamping = 0.0; ;//-1.25;
-  static constexpr double kAngDamping = 0.0; ;//-0.6;
+  static constexpr double kLinDamping =  0.0; ;//-1.25;
+  static constexpr double kAngDamping =  0.0;
 };
 
 } // namespace amrl

@@ -177,7 +177,7 @@ if(_poly_pub.find(obs_name) != _poly_pub.end()) {
       _poly_pub[obs_name].second.vertices[i].x = vertices[i].x;
       _poly_pub[obs_name].second.vertices[i].y = vertices[i].y;
     }
-    
+
     _poly_pub[obs_name].first.publish(_poly_pub[obs_name].second);
   }
 }

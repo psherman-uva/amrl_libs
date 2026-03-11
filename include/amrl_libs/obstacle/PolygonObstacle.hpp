@@ -76,9 +76,6 @@ private:
 
   void set_min_max_values(void);
 
-  /// Center of the obstacle
-  std::vector<Point<double>> _coordinates;
-
   // Number of coordinates
   size_t kNumCoords;
 };

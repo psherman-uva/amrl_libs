@@ -177,7 +177,7 @@ private:
   std::shared_ptr<SqliteDatabase> _logging_db;
 
   // Handle the logging of data for a single table in database
-  std::shared_ptr<amrl::DataHandler> _logger;
+  std::shared_ptr<DataHandler> _logger;
 
   // When true, save data for the next control cycle
   bool _logging_flag;

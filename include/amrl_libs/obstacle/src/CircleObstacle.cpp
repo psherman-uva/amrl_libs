@@ -17,6 +17,9 @@ CircleObstacle::CircleObstacle(const Point<double> &center, const double radius)
   _min_Y = center.y - radius;
 
   _infinityX = _max_X + 1.0;
+
+  _coordinates.resize(kNumCoords);
+  calculate_coordinates();
 }
 
 bool CircleObstacle::is_inside(const Point<double> &pt) const
@@ -104,7 +107,21 @@ void CircleObstacle::update_position(const Eigen::Vector2d &pos_delta)
   _min_Y = _center.y - _radius;
 
   _infinityX = _max_X + 1.0;
+
+  calculate_coordinates();
 }
 
+
+void CircleObstacle::calculate_coordinates(void)
+{
+  double theta = 0.0;
+
+  for(size_t i = 0; i < kNumCoords; ++i) {
+    _coordinates[i].x = _center.x + _radius*cos(theta);
+    _coordinates[i].y = _center.y + _radius*sin(theta);
+
+    theta += kCoordStep;
+  }
+}
 
 } 

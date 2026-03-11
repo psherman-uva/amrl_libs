@@ -278,7 +278,8 @@ std::vector<ObstacleSetupData> obstacle_data_from_file(const std::string &json_f
     {"obstacles",  Obstacle::ObstacleType::kSolid},
     {"dynamic",    Obstacle::ObstacleType::kDynamic},
     {"vibration",  Obstacle::ObstacleType::kVibration},
-    {"hazards",    Obstacle::ObstacleType::kMisc}
+    {"hazards",    Obstacle::ObstacleType::kMisc},
+    {"rough",      Obstacle::ObstacleType::kMisc},
   });
 
   std::ifstream f(json_file, std::ifstream::in);
