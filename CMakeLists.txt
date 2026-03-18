@@ -47,6 +47,7 @@ add_message_files(DIRECTORY ${PROJECT_SOURCE_DIR}/ros_msg
   Circle.msg
   CircleList.msg
   FloatVector.msg
+  PointVector.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs geometry_msgs)

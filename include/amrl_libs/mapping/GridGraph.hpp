@@ -57,6 +57,14 @@ public:
   /// @return XY cell of map
   Point<uint32_t> index_to_cell(uint32_t idx) const;
 
+  /// Breadth search for the nearest cell that is NOT occupied.
+  /// Useful when large buffer is used, and robot starting point
+  /// inside the buffer (i.e. NOT a valid point in graph)
+  /// @note Will return the input if the input cell is valid
+  /// @param cell Cell to find the close free cell 
+  /// @return Closest cell to input that is marked free
+  Point<uint32_t> closest_free_cell(const Point<uint32_t> &cell) const;
+
   /// Check if the corresponding node at an index is connected. 
   /// False if node is occuppied or within unsafe buffer zone.
   /// @param idx Index of node to check 

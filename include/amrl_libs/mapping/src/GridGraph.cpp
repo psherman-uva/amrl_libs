@@ -3,6 +3,7 @@
 #include <amrl_common/util/util.hpp>
 
 #include <iostream>
+#include <queue>
 
 
 namespace amrl { 
@@ -114,7 +115,6 @@ void GridGraph::construct_all_edges(const uint32_t idx)
 void GridGraph::node_occupied_update(const uint32_t idx)
 {
   std::set<uint32_t> neighborhood;
-  // index_connected_neighborhood(neighborhood, idx, _obs_buffer);
   index_full_neighborhood(neighborhood, idx, _obs_buffer);
 
   for(const auto &i : neighborhood) {
@@ -189,29 +189,29 @@ uint32_t GridGraph::get_neighbor(uint32_t idx, uint32_t nbr) const
 
 std::vector<uint32_t> GridGraph::get_all_neighbor_directions(const uint32_t idx) const
 {
-  std::vector<uint32_t> neighbors = kAllNeighbors;
   if(bottom_row_check(idx)) {
     if(left_side_check(idx)) {
-      neighbors = kBottomLeftNghbrs;
+      return kBottomLeftNghbrs;
     } else if(right_side_check(idx)) {
-      neighbors = kBottomRightNghbrs;
+      return kBottomRightNghbrs;
     } else {
-      neighbors = kBottomNeighbors;
+      return kBottomNeighbors;
     }
   } else if(top_row_check(idx)) {
     if(left_side_check(idx)) {
-      neighbors = kTopLeftNghbrs;
+      return kTopLeftNghbrs;
     } else if(right_side_check(idx)) {
-      neighbors = kTopRightNghbrs;
+      return kTopRightNghbrs;
     } else {
-      neighbors = kTopNeighbors;
+      return kTopNeighbors;
     }
   } else if(left_side_check(idx)) {
-    neighbors = kLeftNeighbors;
+    return kLeftNeighbors;
   } else if(right_side_check(idx)) {
-    neighbors = kRightNeighbors;
+    return kRightNeighbors;
   }
-  return neighbors;
+
+  return kAllNeighbors;
 }
 
 double GridGraph::get_default_edge_cost(uint32_t idx, uint32_t nbr) const
@@ -223,6 +223,34 @@ double GridGraph::get_default_edge_cost(uint32_t idx, uint32_t nbr) const
     return 1.0;
   } 
   return sqrt(2.0);
+}
+
+
+Point<uint32_t> GridGraph::closest_free_cell(const Point<uint32_t> &cell) const
+{
+  std::queue<uint32_t> check_next;
+  std::set<uint32_t> checked;
+  
+  uint32_t idx = _map->cell_to_index(cell);
+  check_next.push(idx);
+
+  while(!check_next.empty()) {
+    idx = check_next.front();
+    check_next.pop();
+
+    if(!index_is_occupied(idx)) { return _map->index_to_cell(idx); }
+    checked.insert(idx);
+
+    std::vector<uint32_t> neighbors = get_all_neighbor_directions(idx);
+    for (const auto &n : neighbors) {
+      uint32_t idx_n = get_neighbor(idx, n);
+      if(checked.find(idx_n) == checked.end()) {
+        check_next.push(idx_n);
+      }
+    }
+  }
+
+  return cell;
 }
 
 bool GridGraph::index_is_occupied(uint32_t idx) const
