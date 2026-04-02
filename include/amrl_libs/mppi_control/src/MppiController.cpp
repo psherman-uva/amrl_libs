@@ -32,7 +32,7 @@ MppiController::MppiController(
   _rbt_heading_best(num_sim_steps),
   _u_full(),
   _u_opt(Eigen::VectorXd::Zero(2)),
-  _u_init(),
+  _u_init(Eigen::VectorXd::Zero(2)),
   _u_sim(),
   _costs_saved(num_samples, std::vector<double>(sample_cost->num_components_get(), 0.0)),
   _costs(num_samples),
@@ -56,15 +56,19 @@ MppiController::MppiController(
   _data_ints(),
   _data_reals()
 {
+  
   _u_sim = std::vector<std::vector<Eigen::VectorXd>>(
-      num_samples, std::vector<Eigen::VectorXd>(num_sim_steps, Eigen::VectorXd::Zero(2)));
-
+    num_samples, std::vector<Eigen::VectorXd>(num_sim_steps, Eigen::VectorXd::Zero(2)));
+    
+    std::cout << "  ---- 1" << std::endl;
   _u_init[0] = 0.2*u_upper_limits[0];
   _u_init[1] = 0.0;
+    std::cout << "  ---- 2" << std::endl;
 
   _u_full.resize(num_sim_steps, _u_init);
   _lin_filtered.resize(num_sim_steps);
   _rot_filtered.resize(num_sim_steps);
+
 
   geometry_msgs::Pose p0;
   util::zero_pose(p0);
@@ -72,6 +76,8 @@ MppiController::MppiController(
   uint32_t num_samples_thread = num_samples / _num_threads;
   uint32_t remainder_samples  = num_samples - (_num_threads*num_samples_thread);
   uint32_t start_idx = 0;
+
+  std::cout << "  ---- 3" << std::endl;
   for(uint32_t i = 0; i < _num_threads; ++i) {
     std::shared_ptr<MppiThreadData> data(std::make_shared<MppiThreadData>(
         p0, num_sim_steps, _sim_period, _u_full, 
@@ -87,9 +93,10 @@ MppiController::MppiController(
     start_idx += data->num_samples;
     data->u_sim = std::vector<std::vector<Eigen::VectorXd>>(
       data->num_samples, std::vector<Eigen::VectorXd>(num_sim_steps, Eigen::VectorXd::Zero(2)));
-
-    _thread_data.emplace_back(std::move(data));
+      
+      _thread_data.emplace_back(std::move(data));
   }
+  std::cout << "  ---- 4" << std::endl;
 }
 
 void MppiController::reset(void)

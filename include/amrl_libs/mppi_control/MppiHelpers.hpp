@@ -26,7 +26,7 @@ struct MppiConfig
   MppiConfig(void);
   ~MppiConfig(void) = default;
 
-  std::string to_string(void);
+  std::string to_string(void) const;
 
   double lambda;
 

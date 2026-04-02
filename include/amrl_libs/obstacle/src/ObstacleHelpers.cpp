@@ -68,6 +68,12 @@ std::vector<ObstacleSetupData> obs_data_from_json_obj(nlohmann::json &obs_json, 
       obs.label = "obs" + std::to_string(obstacles.size());
     }
 
+    if(it->contains("topic")) {
+      obs.topic = it->at("topic");
+    } else {
+      obs.topic = "";
+    }
+
     if(it->contains("detectable")) {
       obs.detectable = it->at("detectable");
     } else {
@@ -330,8 +336,8 @@ std::vector<std::shared_ptr<Obstacle>> obstacles_type_from_file(
       }
       return obs;
       
-    } else {
-      ROS_WARN("Invalid JSON file: %s", json_file.c_str()); 
+    } else if (data.empty()) {
+      ROS_WARN("JSON data empty: %s", json_file.c_str()); 
     }
   } else {
     ROS_WARN("JSON file NOT open (likely invalid filename): %s", json_file.c_str()); 

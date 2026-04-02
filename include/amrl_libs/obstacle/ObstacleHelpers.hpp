@@ -24,6 +24,7 @@ struct ObstacleSetupData
   ObstacleShape::ShapeType shape;
 
   std::string label;
+  std::string topic;
 
   bool pos_set    = false;
   bool detectable = false;

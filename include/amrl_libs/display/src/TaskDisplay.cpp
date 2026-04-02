@@ -9,6 +9,7 @@
 
 namespace amrl {
 
+size_t TaskDisplayManager::kCnt = 0;
 const std::string TaskDisplayManager::kDefaultColor("#c7065a");
 
 TaskDisplayManager::TaskDisplayManager(ros::NodeHandle &nh, 
@@ -53,11 +54,10 @@ void TaskDisplayManager::add_from_json_file(const std::string &json_task_file)
         std::string color;
         double alpha;
 
-
-        if(it->contains("name")) {
-          task_name = it->at("name");
+        if(it->contains("label")) {
+          task_name = it->at("label");
         } else {
-          // TODO:
+          task_name = "task" + std::to_string(kCnt++);
         }
 
         if(it->contains("topic")) {

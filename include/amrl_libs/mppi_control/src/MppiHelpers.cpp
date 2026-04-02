@@ -28,7 +28,7 @@ MppiConfig::MppiConfig(void) :
 {
 }
 
-std::string MppiConfig::to_string(void)
+std::string MppiConfig::to_string(void) const
 {
   std::stringstream ss;
 

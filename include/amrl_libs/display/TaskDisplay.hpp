@@ -92,6 +92,8 @@ private:
 
   std::vector<double> kCosAngles;
   std::vector<double> kSinAngles;
+
+  static size_t kCnt;
 };
 
 

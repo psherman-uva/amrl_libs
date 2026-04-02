@@ -30,10 +30,12 @@ public:
 
   void add_from_json_file(const std::string &json_obs_file);
 
-  void add_obstacle(std::shared_ptr<Obstacle> obs);
+  void add_obstacle(
+    std::shared_ptr<Obstacle> obs, const std::string &obs_topic);
 
   void add_obstacle(
     std::shared_ptr<Obstacle> obs,
+    const std::string &obs_topic,
     const std::string &obs_name,
     const std::string &color,
     const double alpha,

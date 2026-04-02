@@ -54,11 +54,11 @@ void ObstacleDisplayManager::add_from_setup_data(const std::vector<util::Obstacl
 
     std::string color = o.color.empty() ? kColorMap.at(obs->type_get()) : o.color;
 
-    add_obstacle(obs, req_name, color,  o.alpha, o.zorder);
+    add_obstacle(obs, o.topic, req_name, color,  o.alpha, o.zorder);
   }
 }
 
-void ObstacleDisplayManager::add_obstacle(std::shared_ptr<Obstacle> obs)
+void ObstacleDisplayManager::add_obstacle(std::shared_ptr<Obstacle> obs, const std::string &obs_topic)
 {
   std::string req_name = "";
   std::string color    = kColorMap.at(obs->type_get());
@@ -73,12 +73,12 @@ void ObstacleDisplayManager::add_obstacle(std::shared_ptr<Obstacle> obs)
     req_name = kDefaultMiscName + std::to_string(_cnt_misc++);
   }
 
-  add_obstacle(obs, req_name, color, alpha, zorder);
+  add_obstacle(obs, obs_topic, req_name, color, alpha, zorder);
 }
-
 
 void ObstacleDisplayManager::add_obstacle(
   std::shared_ptr<Obstacle> obs,
+  const std::string &obs_topic,
   const std::string &obs_name,
   const std::string &color,
   const double alpha,
@@ -86,7 +86,11 @@ void ObstacleDisplayManager::add_obstacle(
 {
   if(_add_poly_client.waitForExistence(ros::Duration(5.0)) && 
       _add_circle_client.waitForExistence(ros::Duration(5.0))) {
-    std::string topic = _node_name + obs_name;
+    std::string topic = "";
+    if(!obs_topic.empty()) {
+      topic = _node_name + obs_topic;
+    } 
+
     std::vector<double> obs_info = obs->data_get();
 
     amrl_display::ElementConfig config;
@@ -137,7 +141,7 @@ void ObstacleDisplayManager::add_obstacle(
 
         _poly_pub[obs_name].second.color    = _poly_srv.request.config.color;
         _poly_pub[obs_name].second.vertices = _poly_srv.request.vertices;
-      } else {
+      } else if (!topic.empty()) {
         ROS_WARN("Call failed to obstacle: %s", obs_name.c_str());
       }
     }
