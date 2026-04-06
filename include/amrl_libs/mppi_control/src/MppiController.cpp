@@ -60,10 +60,8 @@ MppiController::MppiController(
   _u_sim = std::vector<std::vector<Eigen::VectorXd>>(
     num_samples, std::vector<Eigen::VectorXd>(num_sim_steps, Eigen::VectorXd::Zero(2)));
     
-    std::cout << "  ---- 1" << std::endl;
   _u_init[0] = 0.2*u_upper_limits[0];
   _u_init[1] = 0.0;
-    std::cout << "  ---- 2" << std::endl;
 
   _u_full.resize(num_sim_steps, _u_init);
   _lin_filtered.resize(num_sim_steps);
@@ -77,7 +75,6 @@ MppiController::MppiController(
   uint32_t remainder_samples  = num_samples - (_num_threads*num_samples_thread);
   uint32_t start_idx = 0;
 
-  std::cout << "  ---- 3" << std::endl;
   for(uint32_t i = 0; i < _num_threads; ++i) {
     std::shared_ptr<MppiThreadData> data(std::make_shared<MppiThreadData>(
         p0, num_sim_steps, _sim_period, _u_full, 
@@ -96,7 +93,6 @@ MppiController::MppiController(
       
       _thread_data.emplace_back(std::move(data));
   }
-  std::cout << "  ---- 4" << std::endl;
 }
 
 void MppiController::reset(void)
