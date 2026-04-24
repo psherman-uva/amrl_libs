@@ -49,6 +49,9 @@ public:
   // Destructor
   ~OccupancyGrid(void) = default;
 
+  /// Reset the all cells back to the initial probability
+  void reset(void);
+
   double probability_index_occupied(const uint32_t idx) const;
 
   /// Get copy of set of all cells that are currently marked as occupied
@@ -127,6 +130,8 @@ private:
   /// Set of all cells currently marked as "occupied".
   /// Dynamically updated as grid changes
 
+
+
   std::vector<double> _prob_occ;
   std::set<Point<uint32_t>> _occupied;
   std::set<uint32_t> _occupied_idx;
@@ -141,6 +146,7 @@ private:
   const double kLogFree;     /// Log odds adjustment for measured free cell
   const double kLogOccup;    /// Log odds adjustment for mesaured occupied cell
   const double kLogNeighbor; /// Log odds adjustment for neighbor to a mesaured occupied cell
+  const double kInitOdds;
 
   double kLogOddsMin; /// Minimum allowed value for grid probability
   double kLogOddsMax; /// Maximum allowed value for grid probability

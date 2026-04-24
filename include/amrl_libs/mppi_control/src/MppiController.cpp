@@ -400,7 +400,7 @@ std::pair<bool, std::string> MppiController::logging_setup(
   _logging_db = std::make_shared<SqliteDatabase>();
   if(_logging_db->open_database(database_name)) {
     _logger = std::make_shared<amrl::DataHandler>(_logging_db);
-    if(_logger->create_table(table_name, db_labels_hdr, db_ints_hdr, db_reals_hdr)) {
+    if(_logger->create_table(table_name, db_labels_hdr, db_ints_hdr, db_reals_hdr, {})) {
       save_data_set(true);
       _logger->logging_begin();
       _data_labels.resize(db_labels_hdr.size());
@@ -462,7 +462,7 @@ void MppiController::log_data(void)
       _data_reals[10 + j*5]  = _u_sim[i][j][1];        // u1_j
     }
 
-    _logger->buffer_data(_data_labels, _data_ints, _data_reals);
+    _logger->buffer_data(_data_labels, _data_ints, _data_reals, {});
   }
 
   _logging_flag = false;

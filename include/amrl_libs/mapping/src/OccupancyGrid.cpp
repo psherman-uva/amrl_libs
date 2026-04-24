@@ -22,19 +22,17 @@ OccupancyGrid::OccupancyGrid(const Point<double> &origin,
     const double init_probability)
 : Grid(origin, width, height, resolution, log(init_probability/(1.0-init_probability))),
   _prob_occ(_num_cells, init_probability),
+  kInitOdds(log(init_probability/(1.0-init_probability))),
   kLogFree(log(kFreeProb/(1-kFreeProb))), 
   kLogOccup(log(kOccupProb/(1-kOccupProb))),
   kLogNeighbor(log(kNeighborProb/(1-kNeighborProb)))
 {
-  // Initialize log-odds grid
-  double init_odds = log(init_probability/(1.0-init_probability));
-
   // Set values for the mim and max log odds
-  kLogOddsMin = init_odds;
-  kLogOddsMax = init_odds;
+  kLogOddsMin = kInitOdds;
+  kLogOddsMax = kInitOdds;
   for (uint8_t i = 0; i < 25; ++i) {
-    kLogOddsMin += kLogFree - init_odds;
-    kLogOddsMax += kLogOccup - init_odds;
+    kLogOddsMin += kLogFree - kInitOdds;
+    kLogOddsMax += kLogOccup - kInitOdds;
   }
 }
 
@@ -42,6 +40,13 @@ OccupancyGrid::OccupancyGrid(const GridInfo &info,
     const double init_probability)
 : OccupancyGrid(info.origin, info.width, info.height, info.resolution, init_probability)
 {
+}
+
+void OccupancyGrid::reset(void)
+{
+  for(size_t idx = 0; idx < _num_cells; ++idx ) {
+    index_set_value(idx, kInitOdds);
+  } 
 }
 
 double OccupancyGrid::probability_index_occupied(const uint32_t idx) const
@@ -89,6 +94,10 @@ void OccupancyGrid::adjust_cell_odds(const std::vector<Point<uint32_t>> &cells, 
     }
   }
 }
+
+
+
+
 
 void OccupancyGrid::index_set_value(const uint32_t idx, const double value)
 {
