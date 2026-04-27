@@ -25,7 +25,7 @@ void obstacleCallback(const geometry_msgs::TransformStamped::ConstPtr &msg, Obst
 
 std::vector<ObstacleSetupData> obs_data_from_json_obj(nlohmann::json &obs_json, const Obstacle::ObstacleType obs_type)
 {
-   using json = nlohmann::json;
+  using json = nlohmann::json;
 
   std::vector<ObstacleSetupData> obstacles;
 

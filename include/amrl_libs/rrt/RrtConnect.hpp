@@ -1,9 +1,9 @@
 #pragma once
 
 #include <amrl_libs/rrt/PathTree.hpp>
-#include <amrl_libs/obstacle/Obstacle.hpp>
 
 #include <Eigen/Dense>
+#include <functional>
 #include <random>
 
 namespace amrl {
@@ -22,7 +22,8 @@ public:
     std::vector<double> &lower_limits,
     std::vector<double> &upper_limits,
     const double d_eps,
-    const std::vector<std::shared_ptr<Obstacle>> &obs);
+    std::function<double(const Eigen::VectorXd &q1, const Eigen::VectorXd &q2)> dist_func,
+    std::function<bool(const Eigen::VectorXd &q)> collision_func);
   ~RrtConnect(void) = default;
 
   std::vector<Eigen::VectorXd> find_path(const Eigen::VectorXd &q_start, const Eigen::VectorXd &q_goal);
@@ -56,24 +57,18 @@ private:
     const Eigen::VectorXd &q1, 
     const Eigen::VectorXd &q2);
 
-  double distance_func(
-    const Eigen::VectorXd &q1,
-    const Eigen::VectorXd &q2) const;
-  
-  bool collision_check(const Eigen::VectorXd &q) const;
+  std::function<double(const Eigen::VectorXd &q1, const Eigen::VectorXd &q2)> _dist_func;
+  std::function<bool(const Eigen::VectorXd &q)> _collision_func;
 
   std::shared_ptr<PathTree> _Ta;
   std::shared_ptr<PathTree> _Tb;
 
   std::shared_ptr<PathTree::Node> _node_near;
-
   Eigen::VectorXd _q_attract;
   
   const double _d_eps;
   bool _swapped;
   size_t _N;
-
-  std::vector<std::shared_ptr<Obstacle>> _obs;
 
   std::default_random_engine _generator;
   std::vector<std::uniform_real_distribution<double>> _distribution;

@@ -13,12 +13,14 @@ RrtConnect::RrtConnect(
     std::vector<double> &lower_limits,
     std::vector<double> &upper_limits,
     const double d_eps,
-    const std::vector<std::shared_ptr<Obstacle>> &obs) :
+    std::function<double(const Eigen::VectorXd &q1, const Eigen::VectorXd &q2)> dist_func,
+    std::function<bool(const Eigen::VectorXd &q)> collision_func) :
   _Ta(std::make_shared<PathTree>()),
   _Tb(std::make_shared<PathTree>()),
   _d_eps(d_eps),
   _N(lower_limits.size()),
-  _obs(obs),
+  _dist_func(std::move(dist_func)),
+  _collision_func(std::move(collision_func)),
   _generator(std::chrono::system_clock::now().time_since_epoch().count())
 {
   for(size_t i = 0; i < _N; ++i) {
@@ -105,15 +107,15 @@ RrtConnect::Result RrtConnect::connect(std::shared_ptr<PathTree> T, const Eigen:
 bool RrtConnect::new_config(const Eigen::VectorXd &q, const Eigen::VectorXd &q_near, Eigen::VectorXd &q_new)
 {
   Eigen::VectorXd dir = q - q_near;
-  double len = dir.norm();
+  double len = _dist_func(q_near, q);
   if(len <= _d_eps) {
     q_new = q;
   } else {
-    dir.normalize();
+    dir /= len;
     q_new = q_near + (_d_eps * dir);
   }
 
-  return !collision_check(q_new);
+  return !_collision_func(q_new);
 }
 
 
@@ -124,7 +126,7 @@ std::shared_ptr<PathTree::Node> RrtConnect::nearest_neighbor(std::shared_ptr<Pat
 
   auto nodes = T->nodes_list();
   for(const auto &nd : nodes) {
-    double dist = distance_func(q_test, nd->q);
+    double dist = _dist_func(q_test, nd->q);
 
     if(dist < d_min) {
       d_min = dist;
@@ -171,22 +173,8 @@ bool RrtConnect::points_equal(
     const Eigen::VectorXd &q1, 
     const Eigen::VectorXd &q2)
 {
-  double dist = distance_func(q1, q2);
+  double dist = _dist_func(q1, q2);
   return dist <= kZero;
-}
-
-double RrtConnect::distance_func(
-    const Eigen::VectorXd &q1,
-    const Eigen::VectorXd &q2) const
-{
-  Eigen::VectorXd q_test = q2 - q1;
-  return q_test.norm();
-}
-
-bool RrtConnect::collision_check(const Eigen::VectorXd &q) const
-{
-  return std::any_of(_obs.begin(), _obs.end(), [&q] (const std::shared_ptr<Obstacle> o)
-    { return o->is_inside({q[0], q[1]}); });
 }
 
 Eigen::VectorXd RrtConnect::random_config(void)
