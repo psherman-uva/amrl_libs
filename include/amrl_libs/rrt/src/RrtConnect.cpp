@@ -150,24 +150,16 @@ std::vector<Eigen::VectorXd> RrtConnect::final_path(void)
     path_head.push_back(curr_head->q);
     curr_head = curr_head->parent;
   }
+  std::reverse(path_head.begin(), path_head.end());
 
   while(curr_tail) {
     path_tail.push_back(curr_tail->q);
     curr_tail = curr_tail->parent;
   }
-
-  std::reverse(path_head.begin(), path_head.end());
   path_head.insert(path_head.end(), std::make_move_iterator(path_tail.begin()), std::make_move_iterator(path_tail.end()));
 
   return path_head;
 }
-
-
-void RrtConnect::combine_trees(void)
-{
-  if(_swapped) { std::swap(_Ta, _Tb); }
-}
-
 
 bool RrtConnect::points_equal(
     const Eigen::VectorXd &q1, 

@@ -5,9 +5,8 @@
 
 namespace amrl {
 
-RobotBase::RobotBase(const geometry_msgs::Pose &pose0)
- : _pose(pose0),
-   _u(Eigen::VectorXd::Zero(2))
+RobotBase::RobotBase(const geometry_msgs::Pose &pose0) : 
+  _pose(pose0)
 {
 }
 

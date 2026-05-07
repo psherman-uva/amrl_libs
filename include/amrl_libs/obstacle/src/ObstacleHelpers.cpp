@@ -11,6 +11,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 #include <fstream>
+#include <filesystem>
 
 namespace amrl {
 namespace util {
@@ -287,33 +288,35 @@ std::vector<ObstacleSetupData> obstacle_data_from_file(const std::string &json_f
     {"hazards",    Obstacle::ObstacleType::kMisc},
     {"rough",      Obstacle::ObstacleType::kMisc},
   });
-
-  std::ifstream f(json_file, std::ifstream::in);
-  if(f.is_open()) {
-    json data = json::parse(f);
-    if(!data.empty()) { 
-      std::vector<ObstacleSetupData> obs_data;
-
-      for(const auto &op : obs_pairs) {
-        if(data.contains(op.first)) {
-          json obs_json = data[op.first];
-          std::vector<ObstacleSetupData> obs = obs_data_from_json_obj(obs_json, op.second);
-          obs_data.insert(obs_data.end(), obs.begin(), obs.end());
+  
+  if(std::filesystem::is_regular_file(json_file)) {
+    std::ifstream f(json_file, std::ifstream::in);
+    if(f.is_open()) {
+      json data = json::parse(f);
+      if(!data.empty()) { 
+        std::vector<ObstacleSetupData> obs_data;
+  
+        for(const auto &op : obs_pairs) {
+          if(data.contains(op.first)) {
+            json obs_json = data[op.first];
+            std::vector<ObstacleSetupData> obs = obs_data_from_json_obj(obs_json, op.second);
+            obs_data.insert(obs_data.end(), obs.begin(), obs.end());
+          }
         }
+  
+        return obs_data;
+      } else {
+        ROS_WARN("Invalid JSON file: %s", json_file.c_str()); 
       }
-
-      return obs_data;
     } else {
-      ROS_WARN("Invalid JSON file: %s", json_file.c_str()); 
+      ROS_WARN("JSON file NOT open (likely invalid filename): %s", json_file.c_str()); 
     }
   } else {
-    ROS_WARN("JSON file NOT open (likely invalid filename): %s", json_file.c_str()); 
+    ROS_WARN("Invalid filename: %s", json_file.c_str()); 
   }
-
+  
   return {};
 }
-
-
 
 std::vector<std::shared_ptr<Obstacle>> obstacles_type_from_file(
   const std::string &json_file,
@@ -322,25 +325,29 @@ std::vector<std::shared_ptr<Obstacle>> obstacles_type_from_file(
 {
   using json = nlohmann::json;
 
-  std::ifstream f(json_file, std::ifstream::in);
-  if(f.is_open()) {
-    json data = json::parse(f);
-    if(!data.empty() && data.contains(obs_key)) { 
+  if(std::filesystem::is_regular_file(json_file)) {
+    std::ifstream f(json_file, std::ifstream::in);
+    if(f.is_open()) {
+      json data = json::parse(f);
+      if(!data.empty() && data.contains(obs_key)) { 
 
-      json obs_json = data[obs_key];
-      std::vector<ObstacleSetupData> obs_data = obs_data_from_json_obj(obs_json, obs_type);
-      
-      std::vector<std::shared_ptr<Obstacle>> obs;
-      for(const auto &o : obs_data) {
-        obs.push_back(obs_from_setup_data(o));
+        json obs_json = data[obs_key];
+        std::vector<ObstacleSetupData> obs_data = obs_data_from_json_obj(obs_json, obs_type);
+        
+        std::vector<std::shared_ptr<Obstacle>> obs;
+        for(const auto &o : obs_data) {
+          obs.push_back(obs_from_setup_data(o));
+        }
+        return obs;
+        
+      } else if (data.empty()) {
+        ROS_WARN("JSON data empty: %s", json_file.c_str()); 
       }
-      return obs;
-      
-    } else if (data.empty()) {
-      ROS_WARN("JSON data empty: %s", json_file.c_str()); 
+    } else {
+      ROS_WARN("JSON file NOT open (likely invalid filename): %s", json_file.c_str()); 
     }
   } else {
-    ROS_WARN("JSON file NOT open (likely invalid filename): %s", json_file.c_str()); 
+    ROS_WARN("Invalid filename: %s", json_file.c_str()); 
   }
 
   return {};

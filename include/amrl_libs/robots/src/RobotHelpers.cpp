@@ -29,9 +29,9 @@ std::string RobotSetupdata::to_string(void) const
 {
   std::stringstream ss;
 
-  ss << "Robot: " << rbt_name << "\n";
+  ss << "\nRobot Name: " << rbt_name << "\n";
   ss << "\t- Model: " << model << "\n";
-  ss << "\t- Cmd Topic: " << cmd_topic << "\n";
+  ss << "\t- Topic: " << cmd_topic << "\n";
   ss << "\t- Vel Limits: " << util::container_to_string(vel_limits) << "\n";
   ss << "\t- Accel Limits: " << util::container_to_string(acc_limits) << "\n";
   ss << "\t- Pose: " << util::pose_str(pose) << "\n";

@@ -25,7 +25,7 @@ class UavBase : public RobotBase
 {
 public:
 
-  UavBase(const geometry_msgs::Pose &pose0);
+  UavBase(const geometry_msgs::Pose &pose0, const double dt);
 
   virtual ~UavBase(void) = default;
 
@@ -39,8 +39,10 @@ public:
 
 protected:
 
-};
+  // Time step to use for each simulation step
+  const double _dt;  
 
+};
 
 class UavSimple : public UavBase
 {
@@ -64,12 +66,37 @@ private:
   // System model: dx/dt = f(x, u)
   X_t x_dot(const X_t &x, const U_t &u);
 
-  // Time step to use for each simulation step
-  const double _dt;  
+  // ODE solver for simulating robot dynamics forward in time one step
+  RungeKutta<kNumStates, kNumInputs> _solver;
+};
+
+class UavYaw : public UavBase
+{
+private:
+  static constexpr uint8_t kNumStates = 6;
+  static constexpr uint8_t kNumInputs = 3;
+
+  using X_t = Eigen::Vector<double, kNumStates>;
+  using U_t = Eigen::Vector<double, kNumInputs>;
+
+public:
+
+  UavYaw(const geometry_msgs::Pose &pose0, const double dt);
+
+  ~UavYaw(void) = default;
+
+  void drive(void) override;
+
+private:
+
+  // Current full state of the system
+  X_t _x; 
+
+  // System model: dx/dt = f(x, u)
+  X_t x_dot(const X_t &x, const U_t &u);
 
   // ODE solver for simulating robot dynamics forward in time one step
   RungeKutta<kNumStates, kNumInputs> _solver;
-
 };
 
 } // namespace amrl

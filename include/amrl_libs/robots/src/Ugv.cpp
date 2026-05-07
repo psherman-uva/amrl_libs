@@ -19,6 +19,7 @@ UgvBase::UgvBase(const geometry_msgs::Pose &pose0) :
   _vel_limits_upper({0.0, 0.0})
 {
   _pose.position.z = 0.0;
+  _u = Eigen::VectorXd::Zero(2);
 }
 
 Point<double> UgvBase::pos_xy(void) const
@@ -84,6 +85,7 @@ Ugv::Ugv(ros::NodeHandle &nh,
   const std::string &rosbot_str) :
     UgvBase(pose0)
 {
+  _u = Eigen::VectorXd::Zero(2);
   _vel_pub  = nh.advertise<geometry_msgs::Twist>("/" + rosbot_str + "/cmd_vel", 1, true);
 }
 
@@ -109,16 +111,16 @@ void Ugv::drive(const Eigen::VectorXd &u)
 // ---       Simulated Robot       --- //
 // ----------------------------------- //
 
-UgvSim::UgvSim(const geometry_msgs::Pose &pose0, const double dt)
-  :  UgvBase(pose0), 
-    _dt(dt),
-    _u0(U_t::Zero()),
-    _obstacles({}),
-    _solver([&](const X_t &x0, const U_t &u) { return this->x_dot(x0, u); },
-                  RungeKutta<kNumStates, kNumInputs>::SolverType::kThirdOrder),
-    _sigma_angular(0.0),
-    _sigma_linear(0.0),
-    _generator(std::chrono::system_clock::now().time_since_epoch().count())
+UgvSim::UgvSim(const geometry_msgs::Pose &pose0, const double dt) :  
+  UgvBase(pose0), 
+  _dt(dt),
+  _u0(U_t::Zero()),
+  _obstacles({}),
+  _solver([&](const X_t &x0, const U_t &u) { return this->x_dot(x0, u); },
+                RungeKutta<kNumStates, kNumInputs>::SolverType::kThirdOrder),
+  _sigma_angular(0.0),
+  _sigma_linear(0.0),
+  _generator(std::chrono::system_clock::now().time_since_epoch().count())
 {
 }
 

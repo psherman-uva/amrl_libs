@@ -51,8 +51,6 @@ private:
 
   std::vector<Eigen::VectorXd> final_path(void);
 
-  void combine_trees(void);
-
   bool points_equal(
     const Eigen::VectorXd &q1, 
     const Eigen::VectorXd &q2);
@@ -74,9 +72,7 @@ private:
   std::vector<std::uniform_real_distribution<double>> _distribution;
 
   static constexpr double kZero     = 1.0e-6;
-  static constexpr size_t kMaxIters = 10000;
+  static constexpr size_t kMaxIters = 500; // 10000;
 };
-
-// theta error = atan2(sin(theta2 - theta1), cos(theta2 - theta1))
 
 }
