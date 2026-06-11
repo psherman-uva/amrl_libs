@@ -235,7 +235,6 @@ void MppiController::thread_cycle(
       ++u_itr;
     }
 
-
     _sample_cost->compute_costs(cost_idx, data->rbt_pos, data->rbt_heading, data->rbt_vel, sub_path);
     _sample_cost->min_max_cost_check(cost_idx);
     ++cost_idx;

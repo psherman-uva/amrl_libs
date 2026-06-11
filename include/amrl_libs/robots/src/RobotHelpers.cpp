@@ -4,6 +4,7 @@
 
 #include <nlohmann/json.hpp>
 #include <ros/ros.h>
+#include <filesystem>
 #include <fstream>
 
 namespace amrl {
@@ -45,32 +46,36 @@ std::vector<RobotSetupdata> robot_setup_from_json(const std::string &json_file)
 {
   std::vector<RobotSetupdata> rbt_data;
 
-  std::ifstream f(json_file);
-  if (f.is_open()) {
-    ROS_DEBUG("Robots from file: %s", json_file.c_str());
-
-    nlohmann::json data = nlohmann::json::parse(f)["robots"];
-    for(nlohmann::json::iterator it = data.begin(); it != data.end(); ++it) {
-      RobotSetupdata setup;
-
-      setup.rbt_name  = it.value()["name"];
-      setup.model     = it.value()["model"];
-      setup.cmd_topic = it.value()["topic"];
-      
-      if(it->contains("theta")) { setup.theta = it.value()["theta"]; }
-      if(it->contains("position")) {
-        setup.position[0] = it.value()["position"][0];
-        setup.position[1] = it.value()["position"][1];
+  if(std::filesystem::is_regular_file(json_file)) {
+    std::ifstream f(json_file);
+    if (f.is_open()) {
+      ROS_DEBUG("Robots from file: %s", json_file.c_str());
+  
+      nlohmann::json data = nlohmann::json::parse(f)["robots"];
+      for(nlohmann::json::iterator it = data.begin(); it != data.end(); ++it) {
+        RobotSetupdata setup;
+  
+        setup.rbt_name  = it.value()["name"];
+        setup.model     = it.value()["model"];
+        setup.cmd_topic = it.value()["topic"];
+        
+        if(it->contains("theta")) { setup.theta = it.value()["theta"]; }
+        if(it->contains("position")) {
+          setup.position[0] = it.value()["position"][0];
+          setup.position[1] = it.value()["position"][1];
+        }
+  
+        setup.pose.position.x = setup.position[0];
+        setup.pose.position.y = setup.position[1];;
+        setup.pose.orientation = util::quaternion_from_yaw(setup.theta);
+  
+        rbt_data.push_back(setup);
       }
-
-      setup.pose.position.x = setup.position[0];
-      setup.pose.position.y = setup.position[1];;
-      setup.pose.orientation = util::quaternion_from_yaw(setup.theta);
-
-      rbt_data.push_back(setup);
+    } else {
+      ROS_WARN("Not able to open simulated robot file: %s", json_file.c_str());
     }
   } else {
-    ROS_WARN("Not able to open simulated robot file: %s", json_file.c_str());
+    ROS_WARN("Invalid file for robot setup: %s", json_file.c_str());
   }
 
   return rbt_data;

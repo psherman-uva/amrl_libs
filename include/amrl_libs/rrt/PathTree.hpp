@@ -14,12 +14,13 @@ public:
   struct Node {
     Node(const Eigen::VectorXd &q, uint64_t id, std::shared_ptr<Node> parent);
     Node(const Eigen::VectorXd &q, uint64_t id);
-    bool is_neighbor(std::shared_ptr<Node> node) const;
+    bool is_connected(std::shared_ptr<Node> node) const;
 
     Eigen::VectorXd q;
     uint64_t id;
     std::vector<std::shared_ptr<Node>> edges;
     std::shared_ptr<Node> parent;
+    double cost;
   };
 
   PathTree(void);
@@ -30,6 +31,7 @@ public:
   std::shared_ptr<Node> root_node(void);
   std::shared_ptr<Node> add_vertex(const Eigen::VectorXd &q);
   void add_edge(std::shared_ptr<Node> node1, std::shared_ptr<Node> node2);
+  void remove_edge(std::shared_ptr<Node> node1, std::shared_ptr<Node> node2);
 
   std::vector<std::shared_ptr<Node>> nodes_list(void) const;
   std::vector<Eigen::VectorXd> vertices_list(void) const;
@@ -38,9 +40,10 @@ public:
 
 private:
 
-  uint64_t _curr_id;
   std::shared_ptr<Node> _root;
   std::vector<std::shared_ptr<Node>> _vertices;
+
+  static uint64_t _NextID;
 };
 
 }

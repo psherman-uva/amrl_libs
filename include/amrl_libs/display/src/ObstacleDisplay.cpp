@@ -117,8 +117,8 @@ void ObstacleDisplayManager::add_obstacle(
         _circle_pub[obs_name].second.color  = _circle_srv.request.config.color;   
         _circle_pub[obs_name].second.center = _circle_srv.request.center;
         _circle_pub[obs_name].second.radius = _circle_srv.request.radius;
-      } else {
-        ROS_WARN("Call failed to add obstacle: %s", obs_name.c_str());
+      } else if (!topic.empty()) {
+        ROS_WARN("Call failed to add circle obstacle: %s", obs_name.c_str());
       }
 
     } else {
@@ -142,7 +142,7 @@ void ObstacleDisplayManager::add_obstacle(
         _poly_pub[obs_name].second.color    = _poly_srv.request.config.color;
         _poly_pub[obs_name].second.vertices = _poly_srv.request.vertices;
       } else if (!topic.empty()) {
-        ROS_WARN("Call failed to obstacle: %s", obs_name.c_str());
+        ROS_WARN("Call failed to polygon obstacle: %s", obs_name.c_str());
       }
     }
   } else {

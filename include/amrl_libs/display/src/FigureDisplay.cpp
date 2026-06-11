@@ -45,7 +45,7 @@ void FigureDisplayManager::add_from_ros_params(
     }
   }
 
-  if (_fig_client.waitForExistence(ros::Duration(2.0))) {
+  if (_fig_client.waitForExistence(ros::Duration(3.0))) {
     amrl_display::CreateFigure fig_srv;
 
     fig_srv.request.title              = fig_title;

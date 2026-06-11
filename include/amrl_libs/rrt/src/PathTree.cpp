@@ -6,17 +6,20 @@
 
 namespace amrl {
 
-PathTree::Node::Node(const Eigen::VectorXd &q, uint64_t id, std::shared_ptr<Node> parent)
-  : q(q), id(id), edges(), parent(parent)
+
+uint64_t PathTree::_NextID = 0;
+
+PathTree::Node::Node(const Eigen::VectorXd &q, uint64_t id, std::shared_ptr<Node> parent) : 
+  q(q), id(id), edges(), parent(parent), cost(0.0)
 {
 }
 
-PathTree::Node::Node(const Eigen::VectorXd &q, uint64_t id)
-  : Node(q, id, nullptr)
+PathTree::Node::Node(const Eigen::VectorXd &q, uint64_t id) : 
+  Node(q, id, nullptr)
 {
 }
 
-bool PathTree::Node::is_neighbor(std::shared_ptr<Node> node) const
+bool PathTree::Node::is_connected(std::shared_ptr<Node> node) const
 {
   uint64_t test_id = node->id;
 
@@ -25,7 +28,6 @@ bool PathTree::Node::is_neighbor(std::shared_ptr<Node> node) const
 }
 
 PathTree::PathTree(void) :
-  _curr_id(0),
   _root(nullptr)
 {
 }
@@ -38,11 +40,10 @@ PathTree::PathTree(const Eigen::VectorXd &q_init) :
 
 void PathTree::init(const Eigen::VectorXd &q_init)
 {
-  _curr_id = 0,
-  _root    = nullptr;
+  _root = nullptr;
   _vertices.clear();
-
-  _root = std::make_shared<Node>(q_init, _curr_id);
+  
+  _root = std::make_shared<Node>(q_init, _NextID);
   _vertices.push_back(_root);
 }
 
@@ -53,20 +54,33 @@ std::shared_ptr<PathTree::Node> PathTree::root_node(void)
 
 std::shared_ptr<PathTree::Node> PathTree::add_vertex(const Eigen::VectorXd &q)
 {
-  ++_curr_id;
-  std::shared_ptr<Node> n_new = std::make_shared<Node>(q, _curr_id);
+  ++_NextID;
+  std::shared_ptr<Node> n_new = std::make_shared<Node>(q, _NextID);
   _vertices.push_back(n_new);
   return n_new;
 }
 
 void PathTree::add_edge(std::shared_ptr<Node> node1, std::shared_ptr<Node> node2)
 {
-  if(!node1->is_neighbor(node2)) {
+  if(!node1->is_connected(node2)) {
     node1->edges.push_back(node2);
   }
 
-  if(!node2->is_neighbor(node1)) {
+  if(!node2->is_connected(node1)) {
     node2->edges.push_back(node1);
+  }
+}
+
+void PathTree::remove_edge(std::shared_ptr<Node> node1, std::shared_ptr<Node> node2)
+{
+  for(auto it = node1->edges.begin(); it != node1->edges.end(); ) {
+    if ((*it)->id == node2->id) { it = node1->edges.erase(it);  }
+    else                        { ++it; }
+  }
+
+  for(auto it = node2->edges.begin(); it != node2->edges.end(); ) {
+    if ((*it)->id == node1->id) { it = node2->edges.erase(it);  }
+    else                        { ++it; }
   }
 }
 
@@ -88,9 +102,8 @@ std::vector<std::shared_ptr<PathTree::Node>> PathTree::nodes_list(void) const
 std::vector<std::pair<Eigen::VectorXd, Eigen::VectorXd>> PathTree::edge_list(void) const
 {
   std::vector<std::pair<Eigen::VectorXd, Eigen::VectorXd>> edges;
-
   std::set<std::pair<uint64_t, uint64_t>> check_set;
-  
+
   for(const auto v : _vertices) {
     uint64_t id1 = v->id;
     auto q1      = v->q;
@@ -107,7 +120,6 @@ std::vector<std::pair<Eigen::VectorXd, Eigen::VectorXd>> PathTree::edge_list(voi
     }
   }
 
-
   return edges;
 }
 
@@ -117,4 +129,3 @@ size_t PathTree::num_nodes(void) const
 }
 
 }
-

@@ -44,7 +44,7 @@ UavSimple::UavSimple(const geometry_msgs::Pose &pose0, const double dt) :
  _solver([&](const X_t &x0, const U_t &u) { return this->x_dot(x0, u); },
                   RungeKutta<kNumStates, kNumInputs>::SolverType::kThirdOrder)
 {
-  _u = Eigen::VectorXd::Zero(2);
+  _u = Eigen::VectorXd::Zero(kNumInputs);
 }
 
 void UavSimple::drive(void)
@@ -73,8 +73,8 @@ UavYaw::UavYaw(const geometry_msgs::Pose &pose0, const double dt) :
   _solver([&](const X_t &x0, const U_t &u) { return this->x_dot(x0, u); },
                   RungeKutta<kNumStates, kNumInputs>::SolverType::kThirdOrder)
 {
-  _u = Eigen::VectorXd::Zero(3);
-  _x = Eigen::VectorXd::Zero(6);
+  _u = Eigen::VectorXd::Zero(kNumInputs);
+  _x = Eigen::VectorXd::Zero(kNumStates);
 
   _x[0] = _pose.position.x;
   _x[1] = _pose.position.y;

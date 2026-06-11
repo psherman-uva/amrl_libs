@@ -30,22 +30,32 @@ RrtConnect::RrtConnect(
   }
 }
 
-std::vector<Eigen::VectorXd> RrtConnect::find_path(const Eigen::VectorXd &q_start, const Eigen::VectorXd &q_goal)
-{
-  initialize(q_start, q_goal);
-
-  for(size_t i = 0; i < kMaxIters; ++i) {
-    if(step()) { return final_path(); }
-  }
-
-  return std::vector<Eigen::VectorXd>();
-}
-
 void RrtConnect::initialize(const Eigen::VectorXd &q_start, const Eigen::VectorXd &q_goal)
 {
   _swapped = false;
   _Ta->init(q_start);
   _Tb->init(q_goal);
+}
+
+std::vector<Eigen::VectorXd> RrtConnect::find_path(const Eigen::VectorXd &q_start, const Eigen::VectorXd &q_goal)
+{
+  initialize(q_start, q_goal);
+
+  for(size_t i = 0; i < kMaxIters; ++i) {
+    if(step()) { 
+      std::cout << "Returning Final Path" << std::endl;
+      return final_path(); 
+    }
+
+    if((i+1) % 100 == 0) {
+      std::cout << "." << std::flush;
+    } 
+    if ((i+1) % 500 == 0) {
+      std::cout << std::endl;
+    }
+  }
+
+  return std::vector<Eigen::VectorXd>();
 }
 
 bool RrtConnect::step(void)
@@ -161,14 +171,6 @@ std::vector<Eigen::VectorXd> RrtConnect::final_path(void)
   return path_head;
 }
 
-bool RrtConnect::points_equal(
-    const Eigen::VectorXd &q1, 
-    const Eigen::VectorXd &q2)
-{
-  double dist = _dist_func(q1, q2);
-  return dist <= kZero;
-}
-
 Eigen::VectorXd RrtConnect::random_config(void)
 {
   std::vector<double> data(_N);
@@ -176,6 +178,14 @@ Eigen::VectorXd RrtConnect::random_config(void)
     data[i] = _distribution[i](_generator);
   }
   return Eigen::Map<Eigen::VectorXd>(data.data(), data.size());
+}
+
+bool RrtConnect::points_equal(
+    const Eigen::VectorXd &q1, 
+    const Eigen::VectorXd &q2)
+{
+  double dist = _dist_func(q1, q2);
+  return dist <= kZero;
 }
 
 std::pair<std::shared_ptr<PathTree>, std::shared_ptr<PathTree>> RrtConnect::get_trees(void) const

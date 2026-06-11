@@ -21,6 +21,10 @@
 
 namespace amrl {
 
+// ----------------------------------- //
+// ---         Base Class          --- //
+// ----------------------------------- //
+
 class UavBase : public RobotBase
 {
 public:
@@ -40,9 +44,13 @@ public:
 protected:
 
   // Time step to use for each simulation step
-  const double _dt;  
-
+  const double _dt;
 };
+
+
+// ------------------------------------ //
+// ---    Simple Robot Simulation   --- //
+// ------------------------------------ //
 
 class UavSimple : public UavBase
 {
