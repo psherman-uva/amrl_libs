@@ -140,7 +140,7 @@ void UgvSim::drive(void)
   }
 
   X_t x0({_pose.position.x, _pose.position.y, theta()});
-  X_t x1  = _solver.step(x0, _u0, _dt);
+  X_t x1  = _solver(x0, _u0, _dt);
 
   if( _obstacles.empty() || (!collision_check(x1)) ) {
     UgvBase::state_set_manually({x1[0], x1[1]}, x1[2]);
@@ -225,7 +225,7 @@ void UgvAccel::drive(void)
     _u0[1] = std::min(_accel_limit_angular[1], std::max(_accel_limit_angular[0], _u0[1]));
   }
   
-  X_t x1 = _solver.step(_x0, _u0, _dt);
+  X_t x1 = _solver(_x0, _u0, _dt);
 
   if(_vel_limits_set) {
     x1[3] = std::min(_vel_limits_upper[0], std::max(_vel_limits_lower[0], x1[3]));

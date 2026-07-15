@@ -50,7 +50,7 @@ UavSimple::UavSimple(const geometry_msgs::Pose &pose0, const double dt) :
 void UavSimple::drive(void)
 {
   X_t x0({_pose.position.x, _pose.position.y});
-  X_t x1  = _solver.step(x0, _u, _dt);
+  X_t x1  = _solver(x0, _u, _dt);
 
   _pose.position.x = x1[0];
   _pose.position.y = x1[1];
@@ -85,7 +85,7 @@ void UavYaw::drive(void)
 {
   static tf2::Quaternion quat;
 
-  _x = _solver.step(_x, _u, _dt);
+  _x = _solver(_x, _u, _dt);
 
   quat.setRPY(0.0, 0.0, _x[2]);
 

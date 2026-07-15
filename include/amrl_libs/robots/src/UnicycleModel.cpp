@@ -41,7 +41,7 @@ void UnicycleModel::drive(const Eigen::VectorXd &u)
 {
 
   modify_u(u);
-  _x0 = _solver.step(_x0, u, _dt);
+  _x0 = _solver(_x0, u, _dt);
 
 
   if(_x0[4] > KEps || _x0[3] > KEps) {
