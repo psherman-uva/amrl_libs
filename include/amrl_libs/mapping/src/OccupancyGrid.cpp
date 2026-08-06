@@ -123,9 +123,7 @@ void OccupancyGrid::index_value_updated(const uint32_t idx, const Point<uint32_t
     _occupied_idx.erase(idx);
   }
 
-  if(!_callbacks.empty()) {
-    for_each(_callbacks.begin(), _callbacks.end(), [&p, prob](auto func) { func(p.x, p.y, prob); });
-  }
+  std::for_each(_callbacks.begin(), _callbacks.end(), [&p, prob](auto func) { func(p.x, p.y, prob); });
 }
 
 bool OccupancyGrid::index_is_occupied(const uint32_t idx) const

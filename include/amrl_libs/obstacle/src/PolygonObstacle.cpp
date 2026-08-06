@@ -47,11 +47,11 @@ bool PolygonObstacle::is_inside(const Point<double> &pt) const
     }
 
     // Point to the right of all points in polygon
-    Point<double> pt_inf(_infinityX, pt.y);
+    const Point<double> pt_inf(_infinityX, pt.y);
 
     size_t cnt = 0; // Count number of intersections
     for(size_t i = 0; i < kNumCoords; ++i) {
-      size_t next_i = (i+1) % kNumCoords;
+      const size_t next_i = (i+1) % kNumCoords;
 
       // Special case 2: Point is on a line between two vertices
       if(orientation(_coordinates[i], _coordinates[next_i], pt) == 0 &&
@@ -66,7 +66,7 @@ bool PolygonObstacle::is_inside(const Point<double> &pt) const
           // Decrementing count depeneds on if:
           //    - vertex is a top/bottom point or side 
           //    - side is exactly horizontal
-          size_t next_next = (next_i+1) % kNumCoords;
+          const size_t next_next = (next_i+1) % kNumCoords;
           if((_coordinates[i].y < pt.y) != (_coordinates[next_next].y < pt.y) || 
               (_coordinates[i].y == _coordinates[next_i].y)  ) {
             --cnt;
@@ -86,8 +86,7 @@ bool PolygonObstacle::on_border(const Point<double> &pt) const
 {
   // Case 1: Point IS a vertex
   for(const auto &coord : _coordinates){
-    double dist = util::distance(pt, coord);
-    if (dist <= kEps) { return true; }
+    if (util::distance(pt, coord) <= kEps) { return true; }
   }
 
   // Case 2: Point is on line between vertices
@@ -117,13 +116,13 @@ std::pair<double, std::vector<double>> PolygonObstacle::distance_from_point(cons
   std::vector<double> dist_dir(2);
 
   for(size_t i = 0; i < kNumCoords; ++i) {
-    size_t next = (i+1) % kNumCoords;
+    const size_t next = (i+1) % kNumCoords;
     v1[0] = _coordinates[i].x;
     v1[1] = _coordinates[i].y;
     v2[0] = _coordinates[next].x;
     v2[1] = _coordinates[next].y;
-    Eigen::Vector2f v  = v2 - v1;
-    Eigen::Vector2f p2 = ((v*v.transpose())/(v.transpose()*v))*(p - v1) + v1;
+    const Eigen::Vector2f v  = v2 - v1;
+    const Eigen::Vector2f p2 = ((v*v.transpose())/(v.transpose()*v))*(p - v1) + v1;
 
     Point<double> pt2({p2[0], p2[1]});
 
@@ -133,8 +132,8 @@ std::pair<double, std::vector<double>> PolygonObstacle::distance_from_point(cons
       dist_dir[0] = pt2.x - pt.x;
       dist_dir[1] = pt2.y - pt.y;
     } else {
-      double d1 = util::distance(pt, _coordinates[i]);
-      double d2 = util::distance(pt, _coordinates[next]);
+      const double d1 = util::distance(pt, _coordinates[i]);
+      const double d2 = util::distance(pt, _coordinates[next]);
       if (d1 < d2) {
         dist_temp = d1;
         dist_dir[0] = _coordinates[i].x - pt.x;
@@ -166,10 +165,10 @@ std::pair<bool, double> PolygonObstacle::ray_crossing(const Point<double> &p1, c
   std::pair<bool, double> ray_cross({false, std::numeric_limits<double>::max()});
 
   for(size_t i = 0; i < kNumCoords; ++i) {
-    size_t next = ((i+1) % kNumCoords);
+    const size_t next = ((i+1) % kNumCoords);
 
     if (do_intersect(p1, p2, _coordinates[i], _coordinates[next])) {
-      double dist_check  = distance_to_intersection(p1, p2, _coordinates[i], _coordinates[next]);
+      const double dist_check  = distance_to_intersection(p1, p2, _coordinates[i], _coordinates[next]);
       
       if (dist_check < ray_cross.second) {
         ray_cross.first  = true;
@@ -197,10 +196,10 @@ bool PolygonObstacle::do_intersect(
   const Point<double> &p21,
   const Point<double> &p22) const
 {
-  int o1 = orientation(p11, p12, p21);
-  int o2 = orientation(p11, p12, p22);
-  int o3 = orientation(p21, p22, p11);
-  int o4 = orientation(p21, p22, p12);
+  const int o1 = orientation(p11, p12, p21);
+  const int o2 = orientation(p11, p12, p22);
+  const int o3 = orientation(p21, p22, p11);
+  const int o4 = orientation(p21, p22, p12);
 
   if ((o1 != o2) && (o3 != o4))
     return true;
@@ -218,7 +217,7 @@ bool PolygonObstacle::do_intersect(
 
 int PolygonObstacle::orientation(const Point<double> &p1, const Point<double> &p2, const Point<double> &p3) const
 {  
-  double val = (p2.y-p1.y)*(p3.x-p2.x) - (p2.x-p1.x)*(p3.y-p2.y);
+  const double val = (p2.y-p1.y)*(p3.x-p2.x) - (p2.x-p1.x)*(p3.y-p2.y);
   if (std::fabs(val) < kEps)
     return 0;
   else if (val > 0)
@@ -248,21 +247,21 @@ double PolygonObstacle::distance_to_intersection(
   //     https://www.geeksforgeeks.org/program-for-point-of-intersection-of-two-lines/
   //
 
-  double a1 = p2.y - p1.y;
-  double b1 = p1.x - p2.x;
-  double c1 = a1*p1.x + b1*p1.y;
+  const double a1 = p2.y - p1.y;
+  const double b1 = p1.x - p2.x;
+  const double c1 = a1*p1.x + b1*p1.y;
 
-  double a2 = coord2.y - coord1.y;
-  double b2 = coord1.x - coord2.x;
-  double c2 = a2*coord1.x + b2*coord1.y;
+  const double a2 = coord2.y - coord1.y;
+  const double b2 = coord1.x - coord2.x;
+  const double c2 = a2*coord1.x + b2*coord1.y;
 
-  double determinant = a1*b2 - a2*b1;
+  const double determinant = a1*b2 - a2*b1;
 
   if (fabs(determinant) < kEps) {
     return std::min<double>(util::distance(p1, coord1), util::distance(p1, coord2));
   }
 
-  Point<double> p_intersect((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
+  const Point<double> p_intersect((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
   return util::distance(p1, p_intersect);
 }
 
