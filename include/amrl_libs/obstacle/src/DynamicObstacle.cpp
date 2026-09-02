@@ -75,5 +75,15 @@ uint32_t DynamicObstacle::id_get(void) const
   return _id;
 }
 
+DynObsInfo DynamicObstacle::basic_info_get(void) const
+{
+  DynObsInfo info;
+  info.id  = _id;
+  info.pos = _anchor;
+  info.vel = _vel_cmd;
+
+  return info;
+}
+
   
 } // namespace amrl

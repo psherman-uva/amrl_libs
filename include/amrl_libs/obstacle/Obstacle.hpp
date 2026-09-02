@@ -44,7 +44,7 @@ public:
   Obstacle(const Point<double> center, const double radius);
 
   /// Default destructor
-  ~Obstacle(void) = default;
+  virtual ~Obstacle(void) = default;
 
   /// Get coordinates that define the obstacle polygon
   /// @return List of coordinates

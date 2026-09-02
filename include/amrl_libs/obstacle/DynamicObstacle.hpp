@@ -15,6 +15,14 @@
 #include <vector>
 
 namespace amrl {
+
+struct DynObsInfo {
+  uint32_t id;
+  Eigen::Vector2d pos;
+  Eigen::Vector2d vel;
+  double rad;
+};
+
  
 class DynamicObstacle : public Obstacle
 {
@@ -49,6 +57,8 @@ public:
 
   void id_set(uint32_t id);
   uint32_t id_get(void) const;
+
+  DynObsInfo basic_info_get(void) const;
   
 private:
 
