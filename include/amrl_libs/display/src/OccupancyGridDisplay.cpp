@@ -11,6 +11,38 @@
 namespace amrl {
 
 OccupancyGridDisplay::OccupancyGridDisplay(ros::NodeHandle &nh,
+    const std::string &topic_namespace,
+    const std::string &frame_id,
+    const Point<double> &origin,
+    const double width,
+    const double height,
+    const double resolution,
+    const std::shared_ptr<Grid> grid)
+{
+  common_setup(nh, topic_namespace, frame_id, origin, width, height, resolution);
+
+  // Initialize data using current data map
+  size_t n  = _msg.info.width *_msg.info.height;
+  _msg.data = std::vector<int8_t>(n);
+  
+  for(size_t i = 0; i < n; ++i) {
+    double prob  = grid->value_from_index(i);
+    prob = 100.0 - 100.0/(1+exp(prob));
+    int8_t val   = static_cast<int8_t>(prob);
+    _msg.data[i] = val;
+  }
+}
+
+OccupancyGridDisplay::OccupancyGridDisplay(ros::NodeHandle &nh,
+    const std::string &topic_namespace,
+    const std::string &frame_id,
+    const GridInfo &info,
+    const std::shared_ptr<Grid> grid) :
+  OccupancyGridDisplay(nh, topic_namespace, frame_id, info.origin, info.width, info.height, info.resolution, grid)
+{
+}
+
+OccupancyGridDisplay::OccupancyGridDisplay(ros::NodeHandle &nh,
   const std::string &topic_namespace,
   const std::string &frame_id,
   const Point<double> &origin,
@@ -18,6 +50,31 @@ OccupancyGridDisplay::OccupancyGridDisplay(ros::NodeHandle &nh,
   const double height,
   const double resolution,
   const double init_prob)
+{
+  common_setup(nh, topic_namespace, frame_id, origin, width, height, resolution);
+
+  // Data
+  size_t n   = _msg.info.width *_msg.info.height;
+  int8_t val = static_cast<int8_t>(100.0 * init_prob);
+  _msg.data  = std::vector<int8_t>(n, val);
+}
+
+OccupancyGridDisplay::OccupancyGridDisplay(ros::NodeHandle &nh,
+    const std::string &topic_namespace,
+    const std::string &frame_id,
+    const GridInfo &info,
+    const double init_prob) :
+  OccupancyGridDisplay(nh, topic_namespace, frame_id, info.origin, info.width, info.height, info.resolution, init_prob)
+{
+}
+
+void OccupancyGridDisplay::common_setup(ros::NodeHandle &nh,
+    const std::string &topic_namespace,
+    const std::string &frame_id,
+    const Point<double> &origin,
+    const double width,
+    const double height,
+    const double resolution)
 {
   _pub = nh.advertise<nav_msgs::OccupancyGrid>(topic_namespace + "/grid", 1, true);
 
@@ -45,23 +102,6 @@ OccupancyGridDisplay::OccupancyGridDisplay(ros::NodeHandle &nh,
   _msg.info.width         = static_cast<uint32_t>(round(width/resolution));
   _msg.info.height        = static_cast<uint32_t>(round(height/resolution));
   _msg.info.origin        = msg_origin;
-
-  // TODO (pdsherman): Initialize data using map instead. Could have situations
-  // where the map had already been updated before this object is constructed.
-
-  // Data
-  size_t n        = _msg.info.width *_msg.info.height;
-  signed char val = static_cast<signed char>(100.0 * init_prob);
-  _msg.data = std::vector<signed char>(n, val);
-}
-
-OccupancyGridDisplay::OccupancyGridDisplay(ros::NodeHandle &nh,
-    const std::string &topic_namespace,
-    const std::string &frame_id,
-    const GridInfo &info,
-    const double init_prob)
-  : OccupancyGridDisplay(nh, topic_namespace, frame_id, info.origin, info.width, info.height, info.resolution, init_prob)
-{
 }
 
 void OccupancyGridDisplay::publish(void)

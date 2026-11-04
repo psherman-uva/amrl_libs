@@ -44,6 +44,7 @@ void RobotData::setup(
   const std::string config_dir = nh.param<std::string>("/config_dir", "");
   const std::string obs_file   = nh.param<std::string>("/obs_file", "");
   const std::string vicon_file = nh.param<std::string>("/vicon_file", "");
+  const std::string world_dir  = nh.param<std::string>("/world_dir", "");
 
   //
   // Occupancy Map & Display
@@ -66,7 +67,7 @@ void RobotData::setup(
   // Setup Obstacles
   //
   if(!obs_file.empty()) {
-    const std::string obs_file_full = config_dir + obs_file;
+    const std::string obs_file_full = config_dir + world_dir +  obs_file;
     _obstacles = util::solid_obstacles_from_file(obs_file_full);
   }
   

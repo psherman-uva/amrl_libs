@@ -28,6 +28,13 @@ public:
       const uint32_t num_beams = 720,
       const double angle_sweep  = 2*M_PI);
 
+
+  LidarSimulatedObstacles(
+      const std::vector<std::shared_ptr<Obstacle>> &obstacles,
+      const double range,
+      const uint32_t num_beams = 720,
+      const double angle_sweep  = 2*M_PI);
+
   /// Default destructor
   ~LidarSimulatedObstacles(void) = default;
 

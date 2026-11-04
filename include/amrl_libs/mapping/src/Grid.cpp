@@ -9,11 +9,9 @@
 
 #include <cmath>
 #include <utility> // make_pair
-#include <iostream>
 #include <algorithm>
 
 namespace amrl {
-
 
 Grid::Grid(const Point<double> &origin,
     const double width,

@@ -12,6 +12,8 @@
 
 namespace amrl {
 
+using GridCallback = std::function<void(uint32_t, uint32_t, double)>;
+
 struct GridInfo {
 
   GridInfo(void)  = default;

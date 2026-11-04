@@ -4,6 +4,7 @@ add_library(amrl_mapping
   src/GridInfo.cpp
   src/GridGraph.cpp
   src/OccupancyGrid.cpp
+  src/OccupancyGridSimple.cpp
   src/Frontier.cpp
   src/TerrainGrid.cpp)
 target_link_libraries(amrl_mapping

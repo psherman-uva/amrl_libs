@@ -8,6 +8,7 @@
 
 #include <amrl_libs/lidar/LidarSimulated.hpp>
 #include <amrl_libs/mapping/OccupancyGrid.hpp>
+#include <amrl_libs/mapping/OccupancyGridSimple.hpp>
 #include <amrl_libs/display/OccupancyGridDisplay.hpp>
 #include <amrl_libs/obstacle/Obstacle.hpp>
 #include <amrl_libs/obstacle/DynamicObstacle.hpp>
@@ -133,6 +134,7 @@ protected:
 
   /// Header frame identifier
   static const std::string kFrameId;
+
 };
 
 

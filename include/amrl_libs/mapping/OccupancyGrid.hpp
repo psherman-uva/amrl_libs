@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <amrl_libs/mapping/GridInfo.hpp>
 #include <amrl_libs/mapping/Grid.hpp>
 #include <amrl_common/point/Point.hpp>
 
@@ -19,8 +20,6 @@
 #include <memory>
 
 namespace amrl {
-
-using GridCallback = std::function<void(uint32_t, uint32_t, double)>;
 
 /// Class object to implement an bsaic 2D occupancy grid for use in
 /// robotics application. The grid will maintain a grid of cells

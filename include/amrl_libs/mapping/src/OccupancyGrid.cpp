@@ -95,10 +95,6 @@ void OccupancyGrid::adjust_cell_odds(const std::vector<Point<uint32_t>> &cells, 
   }
 }
 
-
-
-
-
 void OccupancyGrid::index_set_value(const uint32_t idx, const double value)
 {
   if (index_in_grid(idx)) {

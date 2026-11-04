@@ -48,8 +48,8 @@ void FigureDisplayManager::add_from_ros_params(
   if (_fig_client.waitForExistence(ros::Duration(3.0))) {
     amrl_display::CreateFigure fig_srv;
 
-    fig_srv.request.title              = fig_title;
     fig_srv.request.label              = fig_label;
+    fig_srv.request.title              = fig_title;
     fig_srv.request.facecolor          = fig_color;
     fig_srv.request.window_size_inches = std::vector<double>({fig_size_X, fig_size_Y});
     fig_srv.request.xy_limits          = xy_limits;

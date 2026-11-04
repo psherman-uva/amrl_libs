@@ -7,10 +7,22 @@ LidarSimulatedObstacles::LidarSimulatedObstacles(
     const std::vector<Obstacle> &obstacles,
     const double range,
     const uint32_t num_beams,
-    const double angle_sweep) 
-: LidarSimulated(range, num_beams, angle_sweep),
+    const double angle_sweep) : 
+  LidarSimulated(range, num_beams, angle_sweep),
   _obstacles(obstacles)
 {
+}
+
+LidarSimulatedObstacles::LidarSimulatedObstacles(
+    const std::vector<std::shared_ptr<Obstacle>> &obstacles,
+    const double range,
+    const uint32_t num_beams,
+    const double angle_sweep) :
+  LidarSimulated(range, num_beams, angle_sweep)
+{
+  for(size_t i = 0; i < obstacles.size(); ++i) {
+    _obstacles.push_back(*obstacles[i]);
+  }
 }
 
 void LidarSimulatedObstacles::add_obstacle(const Obstacle &obs)

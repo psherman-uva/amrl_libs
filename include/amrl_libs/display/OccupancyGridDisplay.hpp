@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <amrl_libs/mapping/Grid.hpp>
 #include <amrl_libs/mapping/GridInfo.hpp>
 #include <amrl_common/point/Point.hpp>
 
@@ -20,6 +21,22 @@ namespace amrl {
 class OccupancyGridDisplay 
 {
 public:
+
+
+  OccupancyGridDisplay(ros::NodeHandle &nh,
+    const std::string &topic_namespace,
+    const std::string &frame_id,
+    const Point<double> &origin,
+    const double width,
+    const double height,
+    const double resolution,
+    const std::shared_ptr<Grid> grid);
+
+  OccupancyGridDisplay(ros::NodeHandle &nh,
+    const std::string &topic_namespace,
+    const std::string &frame_id,
+    const GridInfo &info,
+    const std::shared_ptr<Grid> grid);
 
   /// Constructor
   /// @param  nh ROS nodehandle object
@@ -68,6 +85,15 @@ public:
   void update_data(const uint32_t x, const uint32_t y, const double probability);
 
 private:
+
+  void common_setup(ros::NodeHandle &nh,
+    const std::string &topic_namespace,
+    const std::string &frame_id,
+    const Point<double> &origin,
+    const double width,
+    const double height,
+    const double resolution);
+
   /// ROS publisher
   ros::Publisher _pub;
 
