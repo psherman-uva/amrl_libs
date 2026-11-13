@@ -10,6 +10,7 @@
 
 #include <amrl_libs/lidar/LidarSimulated.hpp>
 #include <amrl_common/point/Point.hpp>
+#include <amrl_common/geometry/Polygon.hpp>
 
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
@@ -83,6 +84,15 @@ public:
 
   std::array<Point<double>, 2> field_of_view(const Point<double> &pos, const double heading) const;
 
+
+  void footprint_update(const Point<double> &pos, const double heading);
+  
+  bool point_is_visible(const Point<double> &pos, const double heading, const Point<double> &pt);
+  bool point_is_visible(const Point<double> &pt) const;
+
+  std::vector<Point<double>> &get_footprint(const Point<double> &pos, const double heading);
+  std::vector<Point<double>> &get_footprint(void);
+
 protected: 
 
   /// Laser scan message output from a lidar measurement
@@ -99,6 +109,11 @@ protected:
 
   /// Angles of each lidar beam (in body frame)
   std::vector<double> kAngles;
+
+  /// Useful for determining if a speific point is space is within lidar view
+  Polygon _footprint;
+  std::vector<Point<double>> _footprint_coords;
+
 
   Point<double> _p1_fov;
   Point<double> _p2_fov;

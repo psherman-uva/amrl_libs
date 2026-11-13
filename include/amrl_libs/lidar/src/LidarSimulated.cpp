@@ -11,6 +11,7 @@ LidarSimulated::LidarSimulated(
     const double angle_sweep) 
 : _publishing(false),
   _range(range),
+  _footprint_coords(num_beams + 1),
   kNumBeams(num_beams),
   kFieldOfView(angle_sweep),
   kThetaDelta(angle_sweep/static_cast<double>(kNumBeams)),
@@ -102,6 +103,42 @@ void LidarSimulated::setup_publishing(ros::NodeHandle &nh, const std::string &to
   _pub = nh.advertise<sensor_msgs::LaserScan>(topic, 5);
 
   _publishing = true;
+}
+
+bool LidarSimulated::point_is_visible(const Point<double> &pos, const double heading, const Point<double> &pt)
+{
+  footprint_update(pos, heading);
+  return point_is_visible(pt);
+}
+
+bool LidarSimulated::point_is_visible(const Point<double> &pt) const
+{
+  return _footprint.is_inside(pt);
+}
+
+std::vector<Point<double>> &LidarSimulated::get_footprint(const Point<double> &pos, const double heading)
+{
+  footprint_update(pos, heading);
+  return _footprint_coords;
+}
+
+std::vector<Point<double>> &LidarSimulated::get_footprint(void)
+{
+  return _footprint_coords;
+}
+
+void LidarSimulated::footprint_update(const Point<double> &pos, const double heading)
+{
+  _footprint_coords[0] = pos;
+
+  auto &ranges = measurement(pos, heading);
+  for(size_t i = 0; i < kNumBeams; ++i) {
+    const double theta = heading + kAngles[i];
+    _footprint_coords[i+1].x = pos.x + ranges[i]*cos(theta);
+    _footprint_coords[i+1].y = pos.y + ranges[i]*sin(theta);
+  }
+
+  _footprint.set_coordinates(_footprint_coords);
 }
 
 std::array<Point<double>, 2> LidarSimulated::field_of_view(const Point<double> &pos, const double heading) const
